@@ -29,9 +29,9 @@ namespace teatree
 /**
  *
  */
-template<typename LeafT, typename BranchT, typename PartFactT>
-class tree_leaf : public tree_node<LeafT,BranchT,PartFactT>
-                , public pool_object<tree_leaf<LeafT,BranchT,PartFactT> >
+template<typename LeafT, typename BranchT>
+class tree_leaf : public tree_node<LeafT,BranchT>
+                , public pool_object<tree_leaf<LeafT,BranchT> >
 {
 public:
     typedef tree_visitor<LeafT,BranchT> tree_visitor_type;

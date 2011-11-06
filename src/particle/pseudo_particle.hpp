@@ -34,22 +34,21 @@ namespace teatree
 /**
  * A pseudo particle.
  */
-template<typename ParticleT, typename PartFactT>
+template<typename ParticleT>
 class pseudo_particle : public tree_branch<ParticleT,
-                                           pseudo_particle<ParticleT, PartFactT>,
-                                           PartFactT,
+                                           pseudo_particle<ParticleT>,
                                            ParticleT::dimension>
 {
 public: // Types & constants
-    typedef ParticleT                            particle_type;
-    typedef pseudo_particle<ParticleT,PartFactT> pseudo_particle_type;
+    typedef ParticleT                  particle_type;
+    typedef pseudo_particle<ParticleT> pseudo_particle_type;
 
     typedef typename particle_type::vector_type vector_type;
     typedef typename particle_type::scalar_type scalar_type;
     typedef typename particle_type::array_type  array_type;
 
     typedef tree_branch<ParticleT,pseudo_particle_type,
-                        PartFactT,ParticleT::dimension> base_type;
+                        ParticleT::dimension> base_type;
     typedef tree_visitor<particle_type,pseudo_particle_type> visitor_type;
 
     enum constants {
@@ -61,7 +60,7 @@ public: // Constructors
     /**
      *
      */
-    template<typename IteratorT>
+    template<typename PartFactT, typename IteratorT>
     pseudo_particle(PartFactT partition_factory,
                     IteratorT first,
                     IteratorT last);
@@ -90,9 +89,9 @@ private:
     scalar_type size_;
 };
 
-template<typename ParticleT, typename PartFactT>
-template<typename IteratorT>
-pseudo_particle<ParticleT,PartFactT>::pseudo_particle(
+template<typename ParticleT>
+template<typename PartFactT, typename IteratorT>
+pseudo_particle<ParticleT>::pseudo_particle(
     PartFactT partition_factory,
     IteratorT first,
     IteratorT last)
@@ -106,8 +105,8 @@ pseudo_particle<ParticleT,PartFactT>::pseudo_particle(
     tv.reduce(q_, absq_, r_, min_, max_, size_);
 }
 
-template<typename ParticleT, typename PartFactT> inline
-void pseudo_particle<ParticleT,PartFactT>::visit(visitor_type& tv)
+template<typename ParticleT> inline
+void pseudo_particle<ParticleT>::visit(visitor_type& tv)
 {
     // See if we, the branch, are acceptable
     if (tv.accept(*this))

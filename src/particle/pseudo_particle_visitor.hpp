@@ -50,7 +50,7 @@ public:
 
 private:
     template<typename P>
-    void visit_common_(P& p);
+    void visit_common(P& p);
 
     scalar_type sum_q_;
     scalar_type sum_absq_;
@@ -62,7 +62,7 @@ private:
 template<typename ParticleT, typename PParticleT>
 void pseudo_particle_visitor<ParticleT,PParticleT>::visit(ParticleT& p)
 {
-    visit_common_(p);
+    visit_common(p);
     min_ = min_.min(p.r().array());
     max_ = max_.max(p.r().array());
 }
@@ -70,7 +70,7 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::visit(ParticleT& p)
 template<typename ParticleT, typename PParticleT>
 void pseudo_particle_visitor<ParticleT,PParticleT>::visit(PParticleT& p)
 {
-    visit_common_(p);
+    visit_common(p);
     min_ = min_.min(p.min());
     max_ = max_.max(p.max());
 }
@@ -90,7 +90,7 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::reduce
 
 template<typename ParticleT, typename PParticleT>
 template<typename P> inline
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit_common_(P& p)
+void pseudo_particle_visitor<ParticleT,PParticleT>::visit_common(P& p)
 {
     sum_q_      += p.q();
     sum_absq_   += p.absq();

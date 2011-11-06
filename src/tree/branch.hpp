@@ -39,17 +39,15 @@ using boost::result_of;
 /**
  * An abstract tree branch.
  */
-template<typename LeafT, typename BranchT, typename PartFactT, int D>
-class tree_branch : public tree_node<LeafT,BranchT,PartFactT>
+template<typename LeafT, typename BranchT, int D>
+class tree_branch : public tree_node<LeafT,BranchT>
                   , public pool_object<BranchT>
 {
 public: // Types & constants
-    typedef tree_node<LeafT,BranchT,PartFactT> node_type;
-    typedef tree_leaf<LeafT,BranchT,PartFactT> leaf_type;
+    typedef tree_node<LeafT,BranchT> node_type;
+    typedef tree_leaf<LeafT,BranchT> leaf_type;
     typedef BranchT                            branch_type;
     typedef tree_visitor<LeafT,BranchT>        visitor_type;
-
-    typedef PartFactT partition_factory_type;
 
     enum constants {
         dimension    = D,
@@ -57,7 +55,7 @@ public: // Types & constants
     };
 
 public: // Constructors & destructors
-    template<typename IteratorT>
+    template<typename PartFactT, typename IteratorT>
     tree_branch(PartFactT partition_factory,
                 IteratorT first,
                 IteratorT last);
@@ -71,7 +69,7 @@ private: // Helpers
      * Depending on the distance between first and last this function
      *  creates either a branch, leaf, or NULL node.
      */
-    template<typename IteratorT> static
+    template<typename PartFactT, typename IteratorT> static
     node_type* make_tree_node(PartFactT partition_factory,
                               IteratorT first,
                               IteratorT last);
@@ -81,17 +79,15 @@ protected:
     int num_children_;
 };
 
-template<typename LeafT, typename BranchT, typename PartFactT, int D>
-template<typename IteratorT>
-tree_branch<LeafT,BranchT,PartFactT,D>::tree_branch(
+template<typename LeafT, typename BranchT, int D>
+template<typename PartFactT, typename IteratorT>
+tree_branch<LeafT,BranchT,D>::tree_branch(
     PartFactT partition_factory,
     IteratorT first,
     IteratorT last)
     : num_children_(0)
 {
-    //std::fill(children_, children_+max_children, static_cast<node_type*>(0));
-
-    typedef typename result_of<partition_factory_type(IteratorT,IteratorT)>::type
+    typedef typename result_of<PartFactT(IteratorT,IteratorT)>::type
                      partition_type;
 
     // Create a partition object to subdivide the branch
@@ -107,8 +103,8 @@ tree_branch<LeafT,BranchT,PartFactT,D>::tree_branch(
     }
 }
 
-template<typename LeafT, typename BranchT, typename PartFactT, int D>
-tree_branch<LeafT,BranchT,PartFactT,D>::~tree_branch()
+template<typename LeafT, typename BranchT, int D>
+tree_branch<LeafT,BranchT,D>::~tree_branch()
 {
     /*
      * Delete our children; we do this in the reverse order that we allocated
@@ -118,17 +114,17 @@ tree_branch<LeafT,BranchT,PartFactT,D>::~tree_branch()
         delete children_[i];
 }
 
-template<typename LeafT, typename BranchT, typename PartFactT, int D> inline
-void tree_branch<LeafT,BranchT,PartFactT,D>::visit_children(visitor_type& tv)
+template<typename LeafT, typename BranchT, int D> inline
+void tree_branch<LeafT,BranchT,D>::visit_children(visitor_type& tv)
 {
     for (int i = 0; i < num_children_; ++i)
         children_[i]->visit(tv);
 }
 
-template<typename LeafT, typename BranchT, typename PartFactT, int D>
-template<typename IteratorT>
-typename tree_branch<LeafT,BranchT,PartFactT,D>::node_type*
-tree_branch<LeafT,BranchT,PartFactT,D>::make_tree_node(
+template<typename LeafT, typename BranchT, int D>
+template<typename PartFactT, typename IteratorT>
+typename tree_branch<LeafT,BranchT,D>::node_type*
+tree_branch<LeafT,BranchT,D>::make_tree_node(
     PartFactT partition_factory,
     IteratorT first,
     IteratorT last)

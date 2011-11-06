@@ -28,7 +28,7 @@ namespace teatree
 /**
  * An abstract tree node.
  */
-template<typename LeafT, typename BranchT, typename PartFactT>
+template<typename LeafT, typename BranchT>
 class tree_node
 {
 public:
