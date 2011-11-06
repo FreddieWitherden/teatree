@@ -1,1 +1,65 @@
-This is todo.
+                               Teatree
+
+About Teatree
+
+  Teatree is  a parallel N-body solver for  electrostatic systems.  It
+  is written in C++ and is designed for simulating dense plasmas.
+
+Compile Time Requirements
+
+  In order to build teatree it is necessary to have first installed:
+
+    • Boost C++ libraries version 1.47 or later [1];
+    • Eigen version 3 or later [2];
+    • CMake version 2.8 or later [3];
+
+  both  of  which  are  readily  available  on  all  recent  GNU/Linux
+  distributions.  Users of Mac OS  X can obtain these packages through
+  MacPorts  [4].   Since  teatree   makes  use  of  advanced  template
+  metaprogramming  techniques it  is  important to  build  it using  a
+  recent C++  compiler.  As of  November 2011 the  following compilers
+  are known to have successfully built teatree:
+
+    • GCC 4.2; 4.5+ recommended for performance reasons;
+    • Clang 2.9; sans OpenMP due to lack of compiler support.
+
+  During  the configure  stage  the build  scripts will  automatically
+  instruct the  compiler to  generate a binary  specifically optimised
+  for the current CPU architecture.  A consequence of this is that the
+  resulting  binaries may  not run  on  systems with  a different  CPU
+  architecture.
+
+Runtime Requirements
+
+  Although  most  of  the  dependencies  are  header-only  some  Boost
+  components  used   by  teatree   also  have  a   runtime  component.
+  Specifically, the  `program_options' and `serialization' frameworks.
+  The  unit test  binaries also  depend on  the `unit_test_framework'.
+  Where binary portability is required it is recommended to link these
+  elements in statically to teatree.
+
+Building Teatree
+
+  After extracting the teatree archive teatree can be built by issuing
+  the following commands:
+
+    $ mkdir build
+    $ cd build
+    $ cmake -G"Unix Makefiles" ../
+    $ make
+
+  for  further information  on the  build process  please  consult the
+  CMake documentation.   After building teatree  it is crucial  to run
+  the associated unit tests:
+
+    $ make test
+
+  which verify that the  various components of teatree are functioning
+  correctly.
+
+References
+
+  [1] Boost http://www.boost.org/
+  [2] Eigen http://eigen.tuxfamily.org/
+  [3] CMake http://www.cmake.org/
+  [4] MacPorts http://www.macports.org/
