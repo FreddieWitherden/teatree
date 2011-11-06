@@ -22,12 +22,15 @@
 
 #include "utils/ipow.hpp"
 
+#include <boost/array.hpp>
 #include <boost/iterator/permutation_iterator.hpp>
 #include <boost/swap.hpp>
 
 namespace teatree { namespace particle_partition_
 {
 
+using boost::array;
+using boost::permutation_iterator;
 using boost::swap;
 
 /**
@@ -43,15 +46,19 @@ public: // Class types & constants
 
     typedef EleIteratorT particle_iterator;
     typedef IdxIteratorT index_iterator;
-    typedef boost::permutation_iterator<particle_iterator,
-                                        index_iterator> particle_p_iterator;
+    typedef permutation_iterator<particle_iterator,
+                                 index_iterator> particle_p_iterator;
 
-    typedef particle_p_iterator* orthant_iterator;
-
-    enum {
+private:
+    enum constants {
         dimension    = particle_type::dimension,
         num_orthants = ipow<2,dimension>::value
     };
+
+    typedef array<particle_p_iterator,num_orthants+1> orthant_list;
+
+public:
+    typedef typename orthant_list::iterator orthant_iterator;
 
 public: // Constructors
     /**
@@ -65,8 +72,8 @@ public: // Constructors
                        particle_p_iterator last_p);
 
 public: // Orthant iteration
-    orthant_iterator begin() { return orthants_; }
-    orthant_iterator end()   { return orthants_+num_orthants+1; }
+    orthant_iterator begin() { return orthants_.begin(); }
+    orthant_iterator end()   { return orthants_.end(); }
 
 private: // Nested classes
     /**
@@ -127,7 +134,7 @@ private: // Nested classes
     };
     
 private: // Member variables
-    particle_p_iterator orthants_[num_orthants+1];
+    orthant_list orthants_;
 };
 
 template<typename ParticleT, typename EleIteratorT, typename IdxIteratorT>
@@ -137,11 +144,12 @@ particle_partition<ParticleT,EleIteratorT,IdxIteratorT>::particle_partition
      particle_p_iterator last_p)
 {
     // Perform the partitioning
-    partition_recurse<>::exec(first_e, first_p.base(), last_p.base(), orthants_);
+    partition_recurse<>::exec(first_e, first_p.base(), last_p.base(),
+                              orthants_.begin());
 
-    // Explicitly set the tail
-    orthants_[0] = first_p;
-    orthants_[num_orthants] = last_p;
+    // Explicitly set the boundary elements
+    orthants_.front() = first_p;
+    orthants_.back()  = last_p;
 }
 
 }

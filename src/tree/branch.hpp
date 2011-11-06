@@ -34,6 +34,7 @@
 namespace teatree { namespace tree_branch_
 {
 
+using boost::array;
 using boost::result_of;
 
 /**
@@ -75,7 +76,7 @@ private: // Helpers
                               IteratorT last);
 
 protected:
-    node_type* children_[max_children];
+    array<node_type*,max_children> children_;
     int num_children_;
 };
 
@@ -122,7 +123,7 @@ void tree_branch<LeafT,BranchT,D>::visit_children(visitor_type& tv)
 }
 
 template<typename LeafT, typename BranchT, int D>
-template<typename PartFactT, typename IteratorT>
+template<typename PartFactT, typename IteratorT> inline
 typename tree_branch<LeafT,BranchT,D>::node_type*
 tree_branch<LeafT,BranchT,D>::make_tree_node(
     PartFactT partition_factory,
