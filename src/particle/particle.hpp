@@ -28,6 +28,7 @@
 #include <boost/type_traits.hpp>
 
 #include <Eigen/Core>
+#include <Eigen/StdVector>
 
 #include "utils/serialise_eigen.hpp"
 
