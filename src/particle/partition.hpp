@@ -17,8 +17,8 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PARTICLE_PARTITION
-#define TEATREE_PARTICLE_PARTITION
+#ifndef TEATREE_PARTICLE_PARTITION_HPP
+#define TEATREE_PARTICLE_PARTITION_HPP
 
 #include "utils/ipow.hpp"
 
@@ -77,7 +77,7 @@ public: // Orthant iteration
 
 private: // Nested classes
     /**
-     * Predicate for passing to std::partition.
+     * Predicate for passing to std::nth_element.
      */
     template<int L>
     class partition_pred
@@ -158,4 +158,4 @@ using particle_partition_::particle_partition;
 
 }
 
-#endif // TEATREE_PARTICLE_PARTITION
+#endif // TEATREE_PARTICLE_PARTITION_HPP
