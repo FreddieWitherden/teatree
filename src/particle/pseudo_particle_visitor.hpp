@@ -22,6 +22,8 @@
 
 #include "tree/visitor.hpp"
 
+#include <boost/assert.hpp>
+
 namespace teatree { namespace pseduo_particle_visitor_
 {
 
@@ -37,8 +39,7 @@ public:
       : sum_q_(0)
       , sum_absq_(0)
       , sum_absq_r_(vector_type::Zero())
-      , min_(vector_type::Zero())
-      , max_(vector_type::Zero())
+      , first_(true)
     {}
 
     bool accept(PParticleT&) { return true; }
@@ -57,22 +58,23 @@ private:
     vector_type sum_absq_r_;
     array_type  min_;
     array_type  max_;
+    bool        first_;
 };
 
 template<typename ParticleT, typename PParticleT>
 void pseudo_particle_visitor<ParticleT,PParticleT>::visit(ParticleT& p)
 {
+    min_ = first_ ? p.r() : min_.min(p.r().array());
+    max_ = first_ ? p.r() : max_.max(p.r().array());
     visit_common(p);
-    min_ = min_.min(p.r().array());
-    max_ = max_.max(p.r().array());
 }
 
 template<typename ParticleT, typename PParticleT>
 void pseudo_particle_visitor<ParticleT,PParticleT>::visit(PParticleT& p)
 {
+    min_ = first_ ? p.min() : min_.min(p.min());
+    max_ = first_ ? p.max() : max_.max(p.max());
     visit_common(p);
-    min_ = min_.min(p.min());
-    max_ = max_.max(p.max());
 }
 
 template<typename ParticleT, typename PParticleT> inline
@@ -80,6 +82,8 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::reduce
     (scalar_type& q, scalar_type& absq, vector_type& coq,
      array_type& min, array_type& max, scalar_type& size)
 {
+    BOOST_ASSERT(!first_);
+
     q    = sum_q_;
     absq = sum_absq_;
     coq  = sum_absq_r_/sum_absq_;
@@ -95,6 +99,7 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::visit_common(P& p)
     sum_q_      += p.q();
     sum_absq_   += p.absq();
     sum_absq_r_ += p.absq()*p.r();
+    first_      =  false;
 }
 
 }
