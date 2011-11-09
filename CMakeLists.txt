@@ -96,8 +96,6 @@ SET(TEATREE_HEADERS
     src/particle/pseudo_particle.hpp
     src/particle/pseudo_particle_visitor.hpp
     src/tree/branch.hpp
-    src/tree/leaf.hpp
-    src/tree/node.hpp
     src/tree/visitor.hpp
     src/utils/aligned_pool_allocator.hpp
     src/utils/ipow.hpp
