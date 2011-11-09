@@ -20,35 +20,31 @@
 #ifndef TEATREE_TREE_VISITOR
 #define TEATREE_TREE_VISITOR
 
+#include <boost/variant.hpp>
+
 namespace teatree
 {
 
 /**
- * An abstract tree visitor for visiting the leaf and branch nodes of a
- *  tree.
+ * A tree visitor.
  */
-template<typename LeafT, typename BranchT>
-struct tree_visitor
+template<typename DerivedT, typename LeafT, typename BranchT>
+struct tree_visitor : public boost::static_visitor<>
 {
-    virtual ~tree_visitor() {}
+    void operator()(const LeafT* l)
+    {
+        static_cast<DerivedT&>(*this).visit(*l);
+    }
 
-    /**
-     * Called every time a branch node is encountered.  If the branch
-     *  accepted then it is visited and no further visitation occurs.
-     *  Otherwise, if rejected, the child nodes of the branch are
-     *  visited.  Leaf nodes are always visited.
-     */
-    virtual bool accept(BranchT& b) = 0;
+    void operator()(const BranchT* b)
+    {
+        DerivedT& d = static_cast<DerivedT&>(*this);
 
-    /**
-     * Called to visit a leaf node.
-     */
-    virtual void visit(LeafT& l) = 0;
-
-    /**
-     * Called to visit a branch node.
-     */
-    virtual void visit(BranchT& b) = 0;
+        if (d.accept(*b))
+            d.visit(*b);
+        else
+            b->visit_children(d);
+    }
 };
 
 }

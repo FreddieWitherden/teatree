@@ -28,7 +28,10 @@ namespace teatree { namespace pseduo_particle_visitor_
 {
 
 template<typename ParticleT, typename PParticleT>
-class pseudo_particle_visitor : public tree_visitor<ParticleT,PParticleT>
+class pseudo_particle_visitor
+    : public tree_visitor<pseudo_particle_visitor<ParticleT,PParticleT>,
+                          ParticleT,
+                          PParticleT>
 {
 public:
     typedef typename ParticleT::vector_type vector_type;
@@ -42,9 +45,9 @@ public:
       , first_(true)
     {}
 
-    bool accept(PParticleT&) { return true; }
-    void visit(ParticleT& p);
-    void visit(PParticleT& pp);
+    bool accept(const PParticleT&) { return true; }
+    void visit(const ParticleT& p);
+    void visit(const PParticleT& pp);
 
     void reduce(scalar_type& q, scalar_type& absq, vector_type& coq,
                 array_type& min, array_type& max, scalar_type& size);
@@ -62,7 +65,7 @@ private:
 };
 
 template<typename ParticleT, typename PParticleT>
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit(ParticleT& p)
+void pseudo_particle_visitor<ParticleT,PParticleT>::visit(const ParticleT& p)
 {
     min_ = first_ ? p.r() : min_.min(p.r().array());
     max_ = first_ ? p.r() : max_.max(p.r().array());
@@ -70,7 +73,7 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::visit(ParticleT& p)
 }
 
 template<typename ParticleT, typename PParticleT>
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit(PParticleT& p)
+void pseudo_particle_visitor<ParticleT,PParticleT>::visit(const PParticleT& p)
 {
     min_ = first_ ? p.min() : min_.min(p.min());
     max_ = first_ ? p.max() : max_.max(p.max());

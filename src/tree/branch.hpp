@@ -20,35 +20,32 @@
 #ifndef TEATREE_TREE_BRANCH
 #define TEATREE_TREE_BRANCH
 
-#include "tree/node.hpp"
-#include "tree/leaf.hpp"
 #include "utils/pool_object.hpp"
 #include "utils/ipow.hpp"
 
-#include <boost/array.hpp>
-
 #include <algorithm>
 
+#include <boost/array.hpp>
 #include <boost/utility/result_of.hpp>
+#include <boost/variant.hpp>
 
 namespace teatree { namespace tree_branch_
 {
 
 using boost::array;
+using boost::get;
 using boost::result_of;
+using boost::variant;
 
 /**
  * An abstract tree branch.
  */
 template<typename LeafT, typename BranchT, int D>
-class tree_branch : public tree_node<LeafT,BranchT>
-                  , public pool_object<BranchT>
+class tree_branch : public pool_object<BranchT>
 {
 public: // Types & constants
-    typedef tree_node<LeafT,BranchT> node_type;
-    typedef tree_leaf<LeafT,BranchT> leaf_type;
-    typedef BranchT                            branch_type;
-    typedef tree_visitor<LeafT,BranchT>        visitor_type;
+    typedef BranchT branch_type;
+    typedef variant<LeafT*,BranchT*> node_type;
 
     enum constants {
         dimension    = D,
@@ -63,20 +60,11 @@ public: // Constructors & destructors
     ~tree_branch();
 
 public: // Visitation
-    void visit_children(visitor_type& tv);
-
-private: // Helpers
-    /**
-     * Depending on the distance between first and last this function
-     *  creates either a branch, leaf, or NULL node.
-     */
-    template<typename PartFactT, typename IteratorT> static
-    node_type* make_tree_node(PartFactT partition_factory,
-                              IteratorT first,
-                              IteratorT last);
+    template<typename VisitorT>
+    void visit_children(VisitorT& tv) const;
 
 protected:
-    array<node_type*,max_children> children_;
+    array<node_type,max_children> children_;
     int num_children_;
 };
 
@@ -99,8 +87,20 @@ tree_branch<LeafT,BranchT,D>::tree_branch(
     // Make branches/leaves from these subdivisions
     for (int i = 0; i < max_children; ++i)
     {
-        node_type* n = make_tree_node(partition_factory, *(it+i), *(it+i+1));
-        if (n) children_[num_children_++] = n;
+        IteratorT lower = *(it+i), upper = *(it+i+1);
+
+        switch (upper.base() - lower.base())
+        {
+        case 0:
+            continue;
+        case 1:
+            children_[num_children_++] = &(*lower);
+            break;
+        default:
+            children_[num_children_++] = new branch_type(partition_factory,
+                                                         lower, upper);
+            break;
+        }
     }
 }
 
@@ -112,33 +112,16 @@ tree_branch<LeafT,BranchT,D>::~tree_branch()
      * them in to make the allocator's life easier.
      */
     for (int i = num_children_; --i != -1;)
-        delete children_[i];
-}
-
-template<typename LeafT, typename BranchT, int D> inline
-void tree_branch<LeafT,BranchT,D>::visit_children(visitor_type& tv)
-{
-    for (int i = 0; i < num_children_; ++i)
-        children_[i]->visit(tv);
+        if (branch_type** b = get<branch_type*>(&children_[i]))
+            delete *b;
 }
 
 template<typename LeafT, typename BranchT, int D>
-template<typename PartFactT, typename IteratorT> inline
-typename tree_branch<LeafT,BranchT,D>::node_type*
-tree_branch<LeafT,BranchT,D>::make_tree_node(
-    PartFactT partition_factory,
-    IteratorT first,
-    IteratorT last)
+template<typename VisitorT>
+void tree_branch<LeafT,BranchT,D>::visit_children(VisitorT& tv) const
 {
-    switch (last.base() - first.base())
-    {
-    case 0:
-        return static_cast<node_type*>(0);
-    case 1:
-        return new leaf_type(*first);
-    default:
-        return new branch_type(partition_factory, first, last);
-    }
+    std::for_each(children_.begin(), children_.begin()+num_children_,
+                  boost::apply_visitor(tv));
 }
 
 }

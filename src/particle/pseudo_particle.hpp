@@ -22,7 +22,6 @@
 
 #include "particle/pseudo_particle_visitor.hpp"
 #include "tree/branch.hpp"
-#include "tree/node.hpp"
 #include "utils/ipow.hpp"
 
 #include <Eigen/Core>
@@ -49,7 +48,6 @@ public: // Types & constants
 
     typedef tree_branch<ParticleT,pseudo_particle_type,
                         ParticleT::dimension> base_type;
-    typedef tree_visitor<particle_type,pseudo_particle_type> visitor_type;
 
     enum constants {
         dimension    = particle_type::dimension,
@@ -76,10 +74,6 @@ public: // Accessors
     scalar_type absq() const { return absq_; }
     scalar_type size() const { return size_; }
 
-
-public: // Visitors
-    void visit(visitor_type& tv);
-
 private:
     vector_type r_;
     array_type min_;
@@ -103,17 +97,6 @@ pseudo_particle<ParticleT>::pseudo_particle(
     pseudo_particle_visitor<particle_type,pseudo_particle_type> tv;
     this->visit_children(tv);
     tv.reduce(q_, absq_, r_, min_, max_, size_);
-}
-
-template<typename ParticleT> inline
-void pseudo_particle<ParticleT>::visit(visitor_type& tv)
-{
-    // See if we, the branch, are acceptable
-    if (tv.accept(*this))
-        tv.visit(*this);
-    // Otherwise, visit our children
-    else
-        this->visit_children(tv);
 }
 
 }
