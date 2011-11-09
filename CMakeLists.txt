@@ -119,6 +119,9 @@ INCLUDE(CTest)
 # Integrate boost::test with CTest
 INCLUDE(BoostTestTargets)
 
+ADD_BOOST_TEST(tree
+  SOURCES tests/tree.cpp
+  TESTS construction)
 ADD_BOOST_TEST(serialisation
   SOURCES tests/serialisation.cpp
   TESTS eigen)
