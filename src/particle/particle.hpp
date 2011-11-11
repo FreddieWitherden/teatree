@@ -74,8 +74,8 @@ private: // Storage
     vector_type r_;
     vector_type v_;
 
-    /*const*/ scalar_type q_;
-    /*const*/ scalar_type qtom_;
+    scalar_type q_;
+    scalar_type qtom_;
 
 private: // Alignment considerations
     enum {
@@ -90,8 +90,8 @@ template<typename VectorT> inline
 particle<VectorT>::particle()
     : r_(vector_type::Zero())
     , v_(vector_type::Zero())
-    , q_(0)
-    , qtom_(0)
+    , q_(0.0)
+    , qtom_(0.0)
 {}
 
 template<typename VectorT> inline
@@ -108,8 +108,8 @@ void particle<VectorT>::serialize(ArchiveT& ar, unsigned int)
 {
     ar & r_;
     ar & v_;
-    ar & const_cast<scalar_type&>(q_);
-    ar & const_cast<scalar_type&>(qtom_);
+    ar & q_;
+    ar & qtom_;
 }
 
 }
@@ -117,8 +117,12 @@ void particle<VectorT>::serialize(ArchiveT& ar, unsigned int)
 /*
  * To place objects containing ``fixed-sized vectorizable" Eigen
  * members into a std::vector it is necessary to first define a
- * specialization of std::vector.  We do this here.
+ * specialization of std::vector.  We do this here for vectors of
+ * particles and vectors of vectors.
+ *
+ * See: http://eigen.tuxfamily.org/dox/TopicStlContainers.html
  */
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::Vector2d);
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(teatree::particle<Eigen::Vector2d>);
 
 #endif // TEATREE_PARTICLE_PARTICLE_HPP
