@@ -27,16 +27,15 @@
 namespace teatree { namespace pseduo_particle_visitor_
 {
 
-template<typename ParticleT, typename PParticleT>
+template<typename PParticleT>
 class pseudo_particle_visitor
-    : public tree_visitor<pseudo_particle_visitor<ParticleT,PParticleT>,
-                          ParticleT,
-                          PParticleT>
+    : public tree_visitor<pseudo_particle_visitor<PParticleT>,PParticleT>
 {
 public:
-    typedef typename ParticleT::vector_type vector_type;
-    typedef typename ParticleT::array_type  array_type;
-    typedef typename ParticleT::scalar_type scalar_type;
+    typedef typename PParticleT::particle_type  particle_type;
+    typedef typename particle_type::vector_type vector_type;
+    typedef typename particle_type::array_type  array_type;
+    typedef typename particle_type::scalar_type scalar_type;
 
     pseudo_particle_visitor()
       : sum_q_(0)
@@ -46,7 +45,7 @@ public:
     {}
 
     bool accept(const PParticleT&) { return true; }
-    void visit(const ParticleT& p);
+    void visit(const particle_type& p);
     void visit(const PParticleT& pp);
 
     void reduce(scalar_type& q, scalar_type& absq, vector_type& coq,
@@ -64,24 +63,24 @@ private:
     bool        first_;
 };
 
-template<typename ParticleT, typename PParticleT>
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit(const ParticleT& p)
+template<typename PParticleT>
+void pseudo_particle_visitor<PParticleT>::visit(const particle_type& p)
 {
     min_ = first_ ? p.r() : min_.min(p.r().array());
     max_ = first_ ? p.r() : max_.max(p.r().array());
     visit_common(p);
 }
 
-template<typename ParticleT, typename PParticleT>
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit(const PParticleT& p)
+template<typename PParticleT>
+void pseudo_particle_visitor<PParticleT>::visit(const PParticleT& p)
 {
     min_ = first_ ? p.min() : min_.min(p.min());
     max_ = first_ ? p.max() : max_.max(p.max());
     visit_common(p);
 }
 
-template<typename ParticleT, typename PParticleT> inline
-void pseudo_particle_visitor<ParticleT,PParticleT>::reduce
+template<typename PParticleT> inline
+void pseudo_particle_visitor<PParticleT>::reduce
     (scalar_type& q, scalar_type& absq, vector_type& coq,
      array_type& min, array_type& max, scalar_type& size)
 {
@@ -95,9 +94,9 @@ void pseudo_particle_visitor<ParticleT,PParticleT>::reduce
     size = (max_ - min_).matrix().norm();
 }
 
-template<typename ParticleT, typename PParticleT>
+template<typename PParticleT>
 template<typename P> inline
-void pseudo_particle_visitor<ParticleT,PParticleT>::visit_common(P& p)
+void pseudo_particle_visitor<PParticleT>::visit_common(P& p)
 {
     sum_q_      += p.q();
     sum_absq_   += p.absq();

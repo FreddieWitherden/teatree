@@ -44,8 +44,9 @@ template<typename LeafT, typename BranchT, int D>
 class tree_branch : public pool_object<BranchT>
 {
 public: // Types & constants
+    typedef LeafT   leaf_type;
     typedef BranchT branch_type;
-    typedef variant<LeafT*,BranchT*> node_type;
+    typedef variant<leaf_type*,branch_type*> node_type;
 
     enum constants {
         dimension    = D,

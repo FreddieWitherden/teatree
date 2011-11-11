@@ -28,10 +28,10 @@ namespace teatree
 /**
  * A tree visitor.
  */
-template<typename DerivedT, typename LeafT, typename BranchT>
+template<typename DerivedT, typename BranchT>
 struct tree_visitor : public boost::static_visitor<>
 {
-    void operator()(const LeafT* l)
+    void operator()(const typename BranchT::leaf_type* l)
     {
         static_cast<DerivedT&>(*this).visit(*l);
     }

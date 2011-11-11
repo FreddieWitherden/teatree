@@ -94,7 +94,7 @@ pseudo_particle<ParticleT>::pseudo_particle(
     , max_(vector_type::Zero())
 {
     // Visit our children to determine our aggregate properties
-    pseudo_particle_visitor<particle_type,pseudo_particle_type> tv;
+    pseudo_particle_visitor<pseudo_particle_type> tv;
     this->visit_children(tv);
     tv.reduce(q_, absq_, r_, min_, max_, size_);
 }
