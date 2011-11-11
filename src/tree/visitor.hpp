@@ -17,8 +17,8 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_TREE_VISITOR
-#define TEATREE_TREE_VISITOR
+#ifndef TEATREE_TREE_VISITOR_HPP
+#define TEATREE_TREE_VISITOR_HPP
 
 #include <boost/variant.hpp>
 
@@ -28,25 +28,36 @@ namespace teatree
 /**
  * A tree visitor.
  */
-template<typename DerivedT, typename BranchT>
-struct tree_visitor : public boost::static_visitor<>
+template<typename DerivedT, typename BranchT, typename ReturnT = void>
+struct tree_visitor : public boost::static_visitor<ReturnT>
 {
-    void operator()(const typename BranchT::leaf_type* l)
-    {
-        static_cast<DerivedT&>(*this).visit(*l);
-    }
+    ReturnT operator()(const typename BranchT::leaf_type* l)
+    { return static_cast<DerivedT&>(*this).visit(*l); }
 
-    void operator()(const BranchT* b)
+    ReturnT operator()(const typename BranchT::leaf_type* l) const
+    { return static_cast<const DerivedT&>(*this).visit(*l); }
+
+    ReturnT operator()(const BranchT* b)
     {
         DerivedT& d = static_cast<DerivedT&>(*this);
 
         if (d.accept(*b))
-            d.visit(*b);
+            return d.visit(*b);
         else
-            b->visit_children(d);
+            return b->visit_children(d);
+    }
+
+    ReturnT operator()(const BranchT* b) const
+    {
+        const DerivedT& d = static_cast<const DerivedT&>(*this);
+
+        if (d.accept(*b))
+            return d.visit(*b);
+        else
+            return b->visit_children(d);
     }
 };
 
 }
 
-#endif // TEATREE_TREE_VISITOR
+#endif // TEATREE_TREE_VISITOR_HPP

@@ -50,6 +50,16 @@ const double TOL = 0.01;
 // Accumulator type required
 typedef accumulator_set<double,stats<tag::mean,tag::min,tag::max> > acc_type;
 
+/*
+ * A simple visitor to count the number of particles in the tree.
+ */
+struct counting_visitor
+    : public tree_visitor<counting_visitor,pseudo_particle_type,int>
+{
+    bool accept(const pseudo_particle_type&) const { return false; }
+    int visit(const pseudo_particle_type&)   const { return 0; }
+    int visit(const particle_type&)          const { return 1; }
+};
 
 BOOST_AUTO_TEST_CASE(construction)
 {
@@ -78,6 +88,7 @@ BOOST_AUTO_TEST_CASE(construction)
 
     BOOST_CHECK_EQUAL(pp.q(), N);
     BOOST_CHECK_EQUAL(pp.absq(), N);
+    BOOST_CHECK_EQUAL(pp.visit_children(counting_visitor()), N);
 
     BOOST_CHECK_CLOSE(pp.r().x(), mean(xacc), TOL);
     BOOST_CHECK_CLOSE(pp.r().y(), mean(yacc), TOL);

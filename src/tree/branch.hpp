@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include <boost/array.hpp>
+#include <boost/type_traits.hpp>
 #include <boost/utility/result_of.hpp>
 #include <boost/variant.hpp>
 
@@ -61,8 +62,29 @@ public: // Constructors & destructors
     ~tree_branch();
 
 public: // Visitation
+    /*
+     * C++ does not allow us to provide a partial-specialization of a template
+     * member function inside of a template class.  However, this is required
+     * for the correct handling of void visitors (those which do not return a
+     * value).  We work around this by using regular function overloading
+     * instead.
+     */
+    template<typename T> struct tag {};
+
+    template<typename DerivedT, typename ReturnT>
+    ReturnT visit_children(tree_visitor<DerivedT,branch_type,ReturnT>& tv) const
+    { return visit_children(tag<ReturnT>(), tv); }
+
+    template<typename DerivedT, typename ReturnT>
+    ReturnT visit_children(const tree_visitor<DerivedT,branch_type,ReturnT>& tv) const
+    { return visit_children(tag<ReturnT>(), tv); }
+
+private:
+    template<typename ReturnT, typename VisitorT>
+    ReturnT visit_children(tag<ReturnT>, VisitorT& tv) const;
+
     template<typename VisitorT>
-    void visit_children(VisitorT& tv) const;
+    void visit_children(tag<void>, VisitorT& tv) const;
 
 protected:
     array<node_type,max_children> children_;
@@ -118,11 +140,25 @@ tree_branch<LeafT,BranchT,D>::~tree_branch()
 }
 
 template<typename LeafT, typename BranchT, int D>
-template<typename VisitorT>
-void tree_branch<LeafT,BranchT,D>::visit_children(VisitorT& tv) const
+template<typename ReturnT, typename VisitorT> inline
+ReturnT tree_branch<LeafT,BranchT,D>::visit_children
+    (tag<ReturnT>, VisitorT& tv) const
 {
-    std::for_each(children_.begin(), children_.begin()+num_children_,
-                  boost::apply_visitor(tv));
+    ReturnT ret = boost::apply_visitor(tv, children_[0]);
+
+    for (int i = 1; i < num_children_; ++i)
+        ret += boost::apply_visitor(tv, children_[i]);
+
+    return ret;
+}
+
+template<typename LeafT, typename BranchT, int D>
+template<typename VisitorT> inline
+void tree_branch<LeafT,BranchT,D>::visit_children
+    (tag<void>, VisitorT& tv) const
+{
+    for (int i = 0; i < num_children_; ++i)
+        boost::apply_visitor(tv, children_[i]);
 }
 
 }
