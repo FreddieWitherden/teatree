@@ -59,7 +59,7 @@ public: // Constructors & destructors
     tree_branch(PartFactT partition_factory,
                 IteratorT first,
                 IteratorT last);
-    ~tree_branch();
+    virtual ~tree_branch();
 
 public: // Visitation
     /*
