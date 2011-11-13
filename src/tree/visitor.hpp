@@ -20,10 +20,15 @@
 #ifndef TEATREE_TREE_VISITOR_HPP
 #define TEATREE_TREE_VISITOR_HPP
 
+#include <boost/type_traits.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/variant.hpp>
 
-namespace teatree
+namespace teatree { namespace tree_visitor_
 {
+
+using boost::disable_if;
+using boost::is_void;
 
 /**
  * A tree visitor.
@@ -56,7 +61,20 @@ struct tree_visitor : public boost::static_visitor<ReturnT>
         else
             return b->visit_children(d);
     }
+
+    template<typename T>
+    void operator()(T& sum, const T& val,
+                    typename disable_if<is_void<T> >::type* dummy = 0) const
+    { static_cast<const DerivedT&>(*this).reduce(sum, val); }
+
+    template<typename T>
+    void reduce(T& sum, const T& val) const
+    { sum += val; }
 };
+
+}
+
+using tree_visitor_::tree_visitor;
 
 }
 

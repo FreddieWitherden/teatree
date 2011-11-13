@@ -26,13 +26,13 @@
 #include <algorithm>
 
 #include <boost/array.hpp>
-#include <boost/type_traits.hpp>
 #include <boost/utility/result_of.hpp>
 #include <boost/variant.hpp>
 
 namespace teatree { namespace tree_branch_
 {
 
+using boost::apply_visitor;
 using boost::array;
 using boost::get;
 using boost::result_of;
@@ -144,10 +144,12 @@ template<typename ReturnT, typename VisitorT> inline
 ReturnT tree_branch<LeafT,BranchT,D>::visit_children
     (tag<ReturnT>, VisitorT& tv) const
 {
-    ReturnT ret = boost::apply_visitor(tv, children_[0]);
+    // Visit the our first child to get the return value
+    ReturnT ret = apply_visitor(tv, children_[0]);
 
+    // Visit our remaining children applying the reduction as we go
     for (int i = 1; i < num_children_; ++i)
-        ret += boost::apply_visitor(tv, children_[i]);
+        tv(ret, apply_visitor(tv, children_[i]));
 
     return ret;
 }
@@ -158,7 +160,7 @@ void tree_branch<LeafT,BranchT,D>::visit_children
     (tag<void>, VisitorT& tv) const
 {
     for (int i = 0; i < num_children_; ++i)
-        boost::apply_visitor(tv, children_[i]);
+        apply_visitor(tv, children_[i]);
 }
 
 }

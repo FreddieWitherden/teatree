@@ -50,7 +50,7 @@ const double TOL = 0.01;
 // Accumulator type required
 typedef accumulator_set<double,stats<tag::mean,tag::min,tag::max> > acc_type;
 
-/*
+/**
  * A simple visitor to count the number of particles in the tree.
  */
 struct counting_visitor
@@ -59,6 +59,22 @@ struct counting_visitor
     bool accept(const pseudo_particle_type&) const { return false; }
     int visit(const pseudo_particle_type&)   const { return 0; }
     int visit(const particle_type&)          const { return 1; }
+};
+
+/**
+ * Walks the leaves of a tree computing the minimum position as it goes.
+ *  This makes use of a custom reduction operator.
+ */
+struct min_visitor : public tree_visitor<min_visitor,
+                                         pseudo_particle_type,
+                                         particle_type::array_type>
+{
+    typedef particle_type::array_type array_type;
+
+    bool accept(const pseudo_particle_type&)      const { return false; }
+    array_type visit(const pseudo_particle_type&) const { return array_type(); }
+    array_type visit(const particle_type& p)      const { return p.r(); }
+    void reduce(array_type& m, const array_type& val) const { m = m.min(val); }
 };
 
 BOOST_AUTO_TEST_CASE(construction)
@@ -84,7 +100,10 @@ BOOST_AUTO_TEST_CASE(construction)
     }
 
     // Create the tree
-    pseudo_particle_type pp = make_pseudo_particle(p.begin(), p.end());
+    const pseudo_particle_type pp = make_pseudo_particle(p.begin(), p.end());
+
+    // Run the minimum visitor over the leaf nodes
+    const particle_type::array_type minv = pp.visit_children(min_visitor());
 
     BOOST_CHECK_EQUAL(pp.q(), N);
     BOOST_CHECK_EQUAL(pp.absq(), N);
@@ -93,9 +112,12 @@ BOOST_AUTO_TEST_CASE(construction)
     BOOST_CHECK_CLOSE(pp.r().x(), mean(xacc), TOL);
     BOOST_CHECK_CLOSE(pp.r().y(), mean(yacc), TOL);
 
-    BOOST_CHECK_CLOSE(pp.min().x(), min(xacc), TOL);
-    BOOST_CHECK_CLOSE(pp.min().y(), min(yacc), TOL);
+    BOOST_CHECK_EQUAL(pp.min().x(), min(xacc));
+    BOOST_CHECK_EQUAL(pp.min().y(), min(yacc));
 
-    BOOST_CHECK_CLOSE(pp.max().x(), max(xacc), TOL);
-    BOOST_CHECK_CLOSE(pp.max().y(), max(yacc), TOL);
+    BOOST_CHECK_EQUAL(pp.max().x(), max(xacc));
+    BOOST_CHECK_EQUAL(pp.max().y(), max(yacc));
+
+    BOOST_CHECK_EQUAL(pp.min().x(), minv.x());
+    BOOST_CHECK_EQUAL(pp.min().y(), minv.y());
 }
