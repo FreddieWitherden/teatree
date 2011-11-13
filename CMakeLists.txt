@@ -120,6 +120,9 @@ INCLUDE(BoostTestTargets)
 ADD_BOOST_TEST(tree
   SOURCES tests/tree.cpp
   TESTS construction)
+ADD_BOOST_TEST(pusher
+  SOURCES tests/pusher.cpp
+  TESTS order)
 ADD_BOOST_TEST(serialisation
   SOURCES tests/serialisation.cpp
   TESTS eigen)
