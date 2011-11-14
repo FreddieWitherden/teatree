@@ -17,8 +17,8 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_UTILS_POW_HPP
-#define TEATREE_UTILS_POW_HPP
+#ifndef TEATREE_UTILS_IPOW_HPP
+#define TEATREE_UTILS_IPOW_HPP
 
 namespace teatree
 {
@@ -40,4 +40,4 @@ struct ipow<N,1>
 
 }
 
-#endif // TEATREE_UTILS_POW_HPP
+#endif // TEATREE_UTILS_IPOW_HPP
