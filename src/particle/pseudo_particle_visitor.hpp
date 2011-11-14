@@ -20,6 +20,7 @@
 #ifndef TEATREE_PSEUDO_PARTICLE_VISITOR_HPP
 #define TEATREE_PSEUDO_PARTICLE_VISITOR_HPP
 
+#include "particle/typedefs.hpp"
 #include "tree/visitor.hpp"
 
 #include <boost/assert.hpp>
@@ -32,10 +33,7 @@ class pseudo_particle_visitor
     : public tree_visitor<pseudo_particle_visitor<PParticleT>,PParticleT>
 {
 public:
-    typedef typename PParticleT::particle_type  particle_type;
-    typedef typename particle_type::vector_type vector_type;
-    typedef typename particle_type::array_type  array_type;
-    typedef typename particle_type::scalar_type scalar_type;
+    TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
     pseudo_particle_visitor()
       : sum_q_(0)

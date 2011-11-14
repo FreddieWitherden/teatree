@@ -20,6 +20,8 @@
 #ifndef TEATREE_PUSHER_BASE_HPP
 #define TEATREE_PUSHER_BASE_HPP
 
+#include "particle/typedefs.hpp"
+
 #include <vector>
 
 #include <boost/range/algorithm/copy.hpp>
@@ -30,16 +32,14 @@
  *  which prevents template sub-classes from being able to access the
  *  typedef's and members in a base class.
  */
-#define TEATREE_PUSHER_GENERATE_TYPEDEFS(AccelEvalT)                     \
-    typedef pusher_base<AccelEvalT> base_type;                           \
-    typedef typename base_type::particle_type       particle_type;       \
-    typedef typename base_type::scalar_type         scalar_type;         \
-    typedef typename base_type::vector_type         vector_type;         \
-    typedef typename base_type::random_access_range random_access_range; \
-    using base_type::accel_eval;                                         \
-    using base_type::acceleval_;                                         \
-    using base_type::dt_;                                                \
-    using base_type::t_;
+#define TEATREE_PUSHER_GENERATE_TYPEDEFS(AccelEvalT)                       \
+    typedef pusher_base<AccelEvalT> base_type;                             \
+    TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename base_type::particle_type); \
+    typedef typename base_type::random_access_range random_access_range;   \
+    using base_type::accel_eval;                                           \
+    using base_type::acceleval_;                                           \
+    using base_type::dt_;                                                  \
+    using base_type::t_
 
 
 namespace teatree { namespace pusher_base_

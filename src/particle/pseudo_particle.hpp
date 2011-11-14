@@ -21,6 +21,7 @@
 #define TEATREE_PSEUDO_PARTICLE_HPP
 
 #include "particle/pseudo_particle_visitor.hpp"
+#include "particle/typedefs.hpp"
 #include "tree/branch.hpp"
 #include "utils/ipow.hpp"
 
@@ -39,12 +40,9 @@ class pseudo_particle : public tree_branch<ParticleT,
                                            ParticleT::dimension>
 {
 public: // Types & constants
-    typedef ParticleT                  particle_type;
     typedef pseudo_particle<ParticleT> pseudo_particle_type;
 
-    typedef typename particle_type::vector_type vector_type;
-    typedef typename particle_type::scalar_type scalar_type;
-    typedef typename particle_type::array_type  array_type;
+    TEATREE_PARTICLE_GENERATE_TYPEDEFS(ParticleT);
 
     typedef tree_branch<ParticleT,pseudo_particle_type,
                         ParticleT::dimension> base_type;

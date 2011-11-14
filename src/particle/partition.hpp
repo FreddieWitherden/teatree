@@ -20,6 +20,7 @@
 #ifndef TEATREE_PARTICLE_PARTITION_HPP
 #define TEATREE_PARTICLE_PARTITION_HPP
 
+#include "particle/typedefs.hpp"
 #include "utils/ipow.hpp"
 
 #include <boost/array.hpp>
@@ -40,9 +41,7 @@ template<typename ParticleT, typename EleIteratorT, typename IdxIteratorT>
 class particle_partition
 {
 public: // Class types & constants
-    typedef ParticleT                           particle_type;
-    typedef typename particle_type::vector_type vector_type;
-    typedef typename particle_type::scalar_type scalar_type;
+    TEATREE_PARTICLE_GENERATE_TYPEDEFS(ParticleT);
 
     typedef EleIteratorT particle_iterator;
     typedef IdxIteratorT index_iterator;
