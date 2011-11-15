@@ -34,13 +34,13 @@ namespace teatree
 /**
  * A pseudo particle.
  */
-template<typename ParticleT>
+template<typename ParticleT, int MultP>
 class pseudo_particle : public tree_branch<ParticleT,
-                                           pseudo_particle<ParticleT>,
+                                           pseudo_particle<ParticleT,MultP>,
                                            ParticleT::dimension>
 {
 public: // Types & constants
-    typedef pseudo_particle<ParticleT> pseudo_particle_type;
+    typedef pseudo_particle<ParticleT,MultP> pseudo_particle_type;
 
     TEATREE_PARTICLE_GENERATE_TYPEDEFS(ParticleT);
 
@@ -81,9 +81,9 @@ private:
     scalar_type size_;
 };
 
-template<typename ParticleT>
+template<typename ParticleT, int MultP>
 template<typename PartFactT, typename IteratorT>
-pseudo_particle<ParticleT>::pseudo_particle(
+pseudo_particle<ParticleT,MultP>::pseudo_particle(
     PartFactT partition_factory,
     IteratorT first,
     IteratorT last)

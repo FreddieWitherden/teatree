@@ -42,8 +42,8 @@ using boost::phoenix::arg_names::arg2;
 /**
  *
  */
-template<typename EleItT, typename IdxItT> inline
-pseudo_particle<typename iterator_value<EleItT>::type>
+template<int MultP, typename EleItT, typename IdxItT> inline
+pseudo_particle<typename iterator_value<EleItT>::type,MultP>
 make_pseudo_particle(const EleItT begin_e, IdxItT begin_i, IdxItT end_i)
 {
     // Extract the particle type from the element iterator
@@ -57,15 +57,15 @@ make_pseudo_particle(const EleItT begin_e, IdxItT begin_i, IdxItT end_i)
     permutation_iterator begin_p = permutation_iterator(begin_e, begin_i);
     permutation_iterator end_p   = permutation_iterator(begin_e, end_i);
 
-    return pseudo_particle<particle_type>
+    return pseudo_particle<particle_type,MultP>
         (construct<partition_type>(begin_e, arg1, arg2), begin_p, end_p);
 }
 
 /**
  *
  */
-template<typename EleItT> inline
-pseudo_particle<typename iterator_value<EleItT>::type>
+template<int MultP, typename EleItT> inline
+pseudo_particle<typename iterator_value<EleItT>::type,MultP>
 make_pseudo_particle(EleItT begin_e, EleItT end_e)
 {
     // Create a suitable index vector (temporary)
@@ -73,7 +73,7 @@ make_pseudo_particle(EleItT begin_e, EleItT end_e)
                          counting_iterator<int>(end_e - begin_e));
 
     // Defer to the more general function for the actual construction
-    return make_pseudo_particle(begin_e, idx.begin(), idx.end());
+    return make_pseudo_particle<MultP>(begin_e, idx.begin(), idx.end());
 }
 
 }

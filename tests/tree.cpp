@@ -41,7 +41,7 @@ using namespace teatree;
 
 // Type of particle being used for the test
 typedef particle<Vector2d> particle_type;
-typedef pseudo_particle<particle_type> pseudo_particle_type;
+typedef pseudo_particle<particle_type,0> pseudo_particle_type;
 
 // The number of particles to use for testing
 const int N = 5000;
@@ -100,10 +100,10 @@ BOOST_AUTO_TEST_CASE(construction)
     }
 
     // Create the tree
-    const pseudo_particle_type pp = make_pseudo_particle(p.begin(), p.end());
+    const pseudo_particle_type pp = make_pseudo_particle<0>(p.begin(), p.end());
 
     // Create and run the minimum visitor over the leaf nodes
-    const min_visitor mv;
+    min_visitor mv;
     const particle_type::array_type minv = pp.visit_children(mv);
 
     BOOST_CHECK_EQUAL(pp.q(), N);
