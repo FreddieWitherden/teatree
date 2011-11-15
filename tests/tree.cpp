@@ -102,8 +102,9 @@ BOOST_AUTO_TEST_CASE(construction)
     // Create the tree
     const pseudo_particle_type pp = make_pseudo_particle(p.begin(), p.end());
 
-    // Run the minimum visitor over the leaf nodes
-    const particle_type::array_type minv = pp.visit_children(min_visitor());
+    // Create and run the minimum visitor over the leaf nodes
+    const min_visitor mv;
+    const particle_type::array_type minv = pp.visit_children(mv);
 
     BOOST_CHECK_EQUAL(pp.q(), N);
     BOOST_CHECK_EQUAL(pp.absq(), N);
@@ -120,4 +121,7 @@ BOOST_AUTO_TEST_CASE(construction)
 
     BOOST_CHECK_EQUAL(pp.min().x(), minv.x());
     BOOST_CHECK_EQUAL(pp.min().y(), minv.y());
+
+    BOOST_CHECK_EQUAL(mv.branches_visited(), 0);
+    BOOST_CHECK_EQUAL(mv.leaves_visited(), N);
 }

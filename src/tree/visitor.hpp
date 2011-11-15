@@ -34,20 +34,23 @@ using boost::is_void;
  * A tree visitor.
  */
 template<typename DerivedT, typename BranchT, typename ReturnT = void>
-struct tree_visitor : public boost::static_visitor<ReturnT>
+class tree_visitor : public boost::static_visitor<ReturnT>
 {
+public:
+    tree_visitor() : leaves_visited_(0), branches_visited_(0) {}
+
     ReturnT operator()(const typename BranchT::leaf_type* l)
-    { return static_cast<DerivedT&>(*this).visit(*l); }
+    { return ++leaves_visited_,static_cast<DerivedT&>(*this).visit(*l); }
 
     ReturnT operator()(const typename BranchT::leaf_type* l) const
-    { return static_cast<const DerivedT&>(*this).visit(*l); }
+    { return ++leaves_visited_,static_cast<const DerivedT&>(*this).visit(*l); }
 
     ReturnT operator()(const BranchT* b)
     {
         DerivedT& d = static_cast<DerivedT&>(*this);
 
         if (d.accept(*b))
-            return d.visit(*b);
+            return ++branches_visited_,d.visit(*b);
         else
             return b->visit_children(d);
     }
@@ -57,7 +60,7 @@ struct tree_visitor : public boost::static_visitor<ReturnT>
         const DerivedT& d = static_cast<const DerivedT&>(*this);
 
         if (d.accept(*b))
-            return d.visit(*b);
+            return ++branches_visited_,d.visit(*b);
         else
             return b->visit_children(d);
     }
@@ -70,6 +73,13 @@ struct tree_visitor : public boost::static_visitor<ReturnT>
     template<typename T>
     void reduce(T& sum, const T& val) const
     { sum += val; }
+
+    int leaves_visited()   const { return leaves_visited_; }
+    int branches_visited() const { return branches_visited_; }
+
+private:
+    mutable int leaves_visited_;
+    mutable int branches_visited_;
 };
 
 }
