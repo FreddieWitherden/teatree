@@ -91,10 +91,13 @@ ADD_DEFINITIONS("-DTEATREE_HAVE_CONFIG_H")
 # Source files
 ##################################################
 SET(TEATREE_HEADERS
+    src/mac/base.hpp
+    src/mac/opening_angle.hpp
     src/particle/particle.hpp
     src/particle/partition.hpp
     src/particle/pseudo_particle.hpp
     src/particle/pseudo_particle_visitor.hpp
+    src/particle/typedefs.hpp
     src/pusher/base.hpp
     src/pusher/verlet.hpp
     src/tree/branch.hpp
@@ -103,7 +106,8 @@ SET(TEATREE_HEADERS
     src/utils/ipow.hpp
     src/utils/openmp.hpp
     src/utils/pool_object.hpp
-    src/utils/serialise_eigen.hpp)
+    src/utils/serialise_eigen.hpp
+    src/utils/simulation_options.hpp)
 
 ##################################################
 # Executable
