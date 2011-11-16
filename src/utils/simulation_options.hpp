@@ -21,12 +21,13 @@
 #define TEATREE_UTILS_SIMULATION_OPTIONS_HPP
 
 #include <map>
+#include <string>
 
 namespace teatree
 {
 
 /// Map for run-time simulation options
-typedef std::map<const char*, double> simulation_options;
+typedef std::map<std::string, double> simulation_options;
 
 }
 
