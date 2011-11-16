@@ -17,15 +17,15 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PSEUDO_PARTICLE_VISITOR_HPP
-#define TEATREE_PSEUDO_PARTICLE_VISITOR_HPP
+#ifndef TEATREE_PARTICLE_PSEUDO_PARTICLE_VISITOR_HPP
+#define TEATREE_PARTICLE_PSEUDO_PARTICLE_VISITOR_HPP
 
 #include "particle/typedefs.hpp"
 #include "tree/visitor.hpp"
 
 #include <boost/assert.hpp>
 
-namespace teatree { namespace pseduo_particle_visitor_
+namespace teatree
 {
 
 template<typename PParticleT>
@@ -104,8 +104,4 @@ void pseudo_particle_visitor<PParticleT>::visit_common(P& p)
 
 }
 
-using pseduo_particle_visitor_::pseudo_particle_visitor;
-
-}
-
-#endif // TEATREE_PSEUDO_PARTICLE_VISIOR_HPP
+#endif // TEATREE_PARTICLE_PSEUDO_PARTICLE_VISIOR_HPP
