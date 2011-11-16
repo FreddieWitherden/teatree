@@ -75,7 +75,7 @@ public: // Constructors
     ~pseudo_particle() {}
 
 public: // Accessors
-    const vector_type& r()   const { return r_; }
+    const vector_type& r()  const { return r_; }
     const array_type& min() const { return min_; }
     const array_type& max() const { return max_; }
 
@@ -87,8 +87,8 @@ public: // Accessors
 
 private:
     vector_type r_;
-    array_type min_;
-    array_type max_;
+    array_type  min_;
+    array_type  max_;
     scalar_type absq_;
     scalar_type size_;
     particle_moments_type moments_;
@@ -107,7 +107,7 @@ pseudo_particle<ParticleT,MultP>::pseudo_particle(
     this->visit_children(pv);
     pv.reduce(moments_.M, absq_, r_, min_, max_, size_);
 
-    // Compute the multipole moments
+    // Compute the higher order multipole moments (if any)
     moments_visitor<pseudo_particle_type> mv(moments_, r_);
     this->visit_children(mv);
 }

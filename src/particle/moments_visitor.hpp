@@ -20,118 +20,14 @@
 #ifndef TEATREE_PARTICLE_MOMENTS_VISITOR_HPP
 #define TEATREE_PARTICLE_MOMENTS_VISITOR_HPP
 
+#include "particle/detail/moments_recurse.hpp"
 #include "particle/typedefs.hpp"
 #include "tree/visitor.hpp"
 
 #include <boost/static_assert.hpp>
 
-namespace teatree { namespace detail
+namespace teatree
 {
-
-template<typename ScalarT, int Dim, int MultP>
-struct moments_recurse
-{
-    // Static assert
-    BOOST_STATIC_ASSERT_MSG(sizeof(ScalarT) == 0, "Invalid multipole order.");
-};
-
-/**
- * Monopole moment (net charge) in either 2D or 3D.  This is a no-op as the
- *  net charge is computed by pseudo_particle_visitor.
- */
-template<typename ScalarT, int Dim>
-struct moments_recurse<ScalarT,Dim,0>
-{
-    typedef particle_moments<ScalarT,Dim,0> moments_type;
-
-    template<typename ArrayT>
-    static void exec(moments_type& p, const moments_type& d, const ArrayT& r) {}
-};
-
-
-/**
- * Computes the dipole moment in 2D.
- */
-template<typename ScalarT>
-struct moments_recurse<ScalarT,2,1>
-{
-    typedef particle_moments<ScalarT,2,1> moments_type;
-
-    template<typename ArrayT>
-    static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
-    {
-        const ArrayT pD = ArrayT(d.Dx,d.Dy) - r*d.M;
-        p.Dx += pD.x(); p.Dy += pD.y();
-    }
-};
-
-/**
- * Computes the dipole moment in 3D.
- */
-template<typename ScalarT>
-struct moments_recurse<ScalarT,3,1>
-{
-    typedef particle_moments<ScalarT,3,1> moments_type;
-
-    template<typename ArrayT>
-    static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
-    {
-        const ArrayT pD = ArrayT(d.Dx,d.Dy,d.Dz) - r*d.M;
-        p.Dx += pD.x(); p.Dy += pD.y(); p.Dz += pD.z();
-    }
-};
-
-/**
- * Computes the dipole and quadrupole moments in 2D.
- */
-template<typename ScalarT>
-struct moments_recurse<ScalarT,2,2>
-{
-    typedef particle_moments<ScalarT,2,2> moments_type;
-
-    template<typename ArrayT>
-    static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
-    {
-        // Diagonal; compute Qxx and Qyy together
-        const ArrayT pQ = ArrayT(d.Qxx,d.Qyy) - 2*r*ArrayT(d.Dx,d.Dy) + r*r*d.M;
-        p.Qxx += pQ.x(); p.Qyy += pQ.y();
-
-        // Off diagonal
-        p.Qxy += d.Qxy - r.x()*d.Dy - r.y()*d.Dx + r.x()*r.y()*d.M;
-
-        // Recurse to compute the dipole
-        moments_recurse<ScalarT,2,1>::exec(p, d, r);
-    }
-};
-
-/**
- * Computes the dipole and quadrupole moments in 2D.
- */
-template<typename ScalarT>
-struct moments_recurse<ScalarT,3,2>
-{
-    typedef particle_moments<ScalarT,3,2> moments_type;
-
-    template<typename ArrayT>
-    static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
-    {
-        // Diagonal; compute Qxxx, Qyyy and Qzzz together
-        const ArrayT pdQ = ArrayT(d.Qxx,d.Qyy,d.Qzz)
-                         - 2*r*ArrayT(d.Dx,d.Dy,d.Dz)
-                         + r*r*d.M;
-        p.Qxx += pdQ.x(); p.Qyy += pdQ.y(); p.Qzz += pdQ.z();
-
-        // Off diagonal
-        p.Qxy += d.Qxy - r.x()*d.Dy - r.y()*d.Dx + r.x()*r.y()*d.M;
-        p.Qxz += d.Qxz - r.x()*d.Dz - r.z()*d.Dx + r.x()*r.z()*d.M;
-        p.Qyz += d.Qyz - r.y()*d.Dz - r.z()*d.Dy + r.y()*r.z()*d.M;
-
-        // Recurse to compute the dipole
-        moments_recurse<ScalarT,3,1>::exec(p, d, r);
-    }
-};
-
-}
 
 /**
  *

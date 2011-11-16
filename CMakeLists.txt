@@ -93,6 +93,11 @@ ADD_DEFINITIONS("-DTEATREE_HAVE_CONFIG_H")
 SET(TEATREE_HEADERS
     src/mac/base.hpp
     src/mac/opening_angle.hpp
+    src/particle/detail/moments_recurse_2d.hpp
+    src/particle/detail/moments_recurse_3d.hpp
+    src/particle/detail/moments_recurse.hpp
+    src/particle/moments_visitor.hpp
+    src/particle/moments.hpp
     src/particle/particle.hpp
     src/particle/partition.hpp
     src/particle/pseudo_particle.hpp
