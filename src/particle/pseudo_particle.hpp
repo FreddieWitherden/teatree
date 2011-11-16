@@ -17,9 +17,11 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PSEUDO_PARTICLE_HPP
-#define TEATREE_PSEUDO_PARTICLE_HPP
+#ifndef TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP
+#define TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP
 
+#include "particle/moments.hpp"
+#include "particle/moments_visitor.hpp"
 #include "particle/pseudo_particle_visitor.hpp"
 #include "particle/typedefs.hpp"
 #include "tree/branch.hpp"
@@ -35,22 +37,31 @@ namespace teatree
  * A pseudo particle.
  */
 template<typename ParticleT, int MultP>
-class pseudo_particle : public tree_branch<ParticleT,
-                                           pseudo_particle<ParticleT,MultP>,
-                                           ParticleT::dimension>
+class pseudo_particle : public tree_branch< ParticleT
+                                          , pseudo_particle<ParticleT,MultP>
+                                          , ParticleT::dimension
+                                          >
 {
 public: // Types & constants
     typedef pseudo_particle<ParticleT,MultP> pseudo_particle_type;
 
     TEATREE_PARTICLE_GENERATE_TYPEDEFS(ParticleT);
 
-    typedef tree_branch<ParticleT,pseudo_particle_type,
-                        ParticleT::dimension> base_type;
-
     enum constants {
-        dimension    = particle_type::dimension,
-        num_children = ipow<2,dimension>::value
+        dimension       = particle_type::dimension,
+        multipole_order = MultP,
+        num_children    = ipow<2,dimension>::value
     };
+
+    typedef tree_branch< ParticleT
+                       , pseudo_particle_type
+                       , ParticleT::dimension
+                       > base_type;
+
+    typedef particle_moments< scalar_type
+                            , dimension
+                            , multipole_order
+                            > particle_moments_type;
 
 public: // Constructors
     /**
@@ -68,17 +79,19 @@ public: // Accessors
     const array_type& min() const { return min_; }
     const array_type& max() const { return max_; }
 
-    scalar_type q()    const { return q_; }
+    scalar_type q()    const { return moments_.M; }
     scalar_type absq() const { return absq_; }
     scalar_type size() const { return size_; }
+
+    const particle_moments_type& moments() const { return moments_; }
 
 private:
     vector_type r_;
     array_type min_;
     array_type max_;
-    scalar_type q_;
     scalar_type absq_;
     scalar_type size_;
+    particle_moments_type moments_;
 };
 
 template<typename ParticleT, int MultP>
@@ -88,15 +101,17 @@ pseudo_particle<ParticleT,MultP>::pseudo_particle(
     IteratorT first,
     IteratorT last)
     : base_type(partition_factory, first, last)
-    , min_(vector_type::Zero())
-    , max_(vector_type::Zero())
 {
     // Visit our children to determine our aggregate properties
-    pseudo_particle_visitor<pseudo_particle_type> tv;
-    this->visit_children(tv);
-    tv.reduce(q_, absq_, r_, min_, max_, size_);
+    pseudo_particle_visitor<pseudo_particle_type> pv;
+    this->visit_children(pv);
+    pv.reduce(moments_.M, absq_, r_, min_, max_, size_);
+
+    // Compute the multipole moments
+    moments_visitor<pseudo_particle_type> mv(moments_, r_);
+    this->visit_children(mv);
 }
 
 }
 
-#endif // TEATREE_PSEUDO_PARTICLE_HPP
+#endif // TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP

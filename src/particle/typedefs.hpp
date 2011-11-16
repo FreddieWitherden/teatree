@@ -35,8 +35,9 @@ namespace teatree
 /**
  *
  */
-#define TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT)               \
-    typedef PParticleT pseudo_particle_type;                                \
+#define TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT)                 \
+    typedef PParticleT pseudo_particle_type;                                  \
+    typedef typename PParticleT::particle_moments_type particle_moments_type; \
     TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename PParticleT::particle_type)
 
 }
