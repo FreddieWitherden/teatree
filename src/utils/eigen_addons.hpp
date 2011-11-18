@@ -17,33 +17,26 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_UTILS_OPENMP_HPP
-#define TEATREE_UTILS_OPENMP_HPP
+/*
+ * Eigen extensions.  These are injected into the array and matrix base
+ * by config.h.  Given m = [x, y, z]; m.xxz() = [x, x, z].
+ */
 
-#include "config.h"
+#define PER2(a,b) PlainObject a##b() const \
+                  { return PlainObject(this->a(), this->b()); }
+PER2(x,x) PER2(x,y)
+PER2(y,x) PER2(y,y)
+#undef PER2
 
-#ifdef TEATREE_ENABLE_OPENMP
-# include <omp.h>
-#else
-
-// Stub out some of the OpenMP runtime
-typedef enum omp_sched_t
-{
-    omp_sched_static  = 1,
-    omp_sched_dynamic = 2,
-    omp_sched_guided  = 3,
-    omp_sched_auto    = 4
-} omp_sched_t;
-
-static inline void omp_set_num_threads(int) {}
-
-static inline int omp_get_num_threads() { return 1; }
-static inline int omp_get_max_threads() { return 1; }
-static inline int omp_get_thread_num()  { return 1; }
-static inline int omp_get_num_procs()   { return 1; }
-
-static inline int omp_in_parallel()     { return 0; }
-
-#endif
-
-#endif // TEATREE_UTILS_OPENMP_HPP
+#define PER3(a,b,c) PlainObject a##b##c() const \
+                    { return PlainObject(this->a(), this->b(), this->c()); }
+PER3(x,x,x) PER3(x,x,y) PER3(x,x,z)
+PER3(x,y,x) PER3(x,y,y) PER3(x,y,z)
+PER3(x,z,x) PER3(x,z,y) PER3(x,z,z)
+PER3(y,x,x) PER3(y,x,y) PER3(y,x,z)
+PER3(y,y,x) PER3(y,y,y) PER3(y,y,z)
+PER3(y,z,x) PER3(y,z,y) PER3(y,z,z)
+PER3(z,x,x) PER3(z,x,y) PER3(z,x,z)
+PER3(z,y,x) PER3(z,y,y) PER3(z,y,z)
+PER3(z,z,x) PER3(z,z,y) PER3(z,z,z)
+#undef PER3

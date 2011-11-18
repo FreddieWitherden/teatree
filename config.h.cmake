@@ -1,6 +1,9 @@
 #ifndef TEATREE_CONFIG_H
 #define TEATREE_CONFIG_H
 
+#define EIGEN_ARRAYBASE_PLUGIN  "utils/eigen_addons.hpp"
+#define EIGEN_MATRIXBASE_PLUGIN "utils/eigen_addons.hpp"
+
 #cmakedefine TEATREE_BUILD_DATE "@TEATREE_BUILD_DATE@"
 
 #cmakedefine TEATREE_VERSION_MAJOR @TEATREE_VERSION_MAJOR@
@@ -11,4 +14,4 @@
 
 #cmakedefine TEATREE_ENABLE_OPENMP
 
-#endif /* TEATREE_CONFIG_H */
+#endif // TEATREE_CONFIG_H

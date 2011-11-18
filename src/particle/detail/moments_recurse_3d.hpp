@@ -50,16 +50,16 @@ struct moments_recurse<ScalarT,3,2>
     template<typename ArrayT>
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        // Diagonal; compute Qxxx, Qyyy and Qzzz together
-        const ArrayT pdQ = ArrayT(d.Qxx,d.Qyy,d.Qzz)
-                         - 2*r*ArrayT(d.Dx,d.Dy,d.Dz)
-                         + r*r*d.M;
-        p.Qxx += pdQ.x(); p.Qyy += pdQ.y(); p.Qzz += pdQ.z();
+        const ArrayT D(d.Dx,d.Dy,d.Dz);
+
+        // Diagonal
+        const ArrayT pQd = ArrayT(d.Qxx,d.Qyy,d.Qzz) - 2*r*D + r*r*d.M;
+        p.Qxx += pQd.x(); p.Qyy += pQd.y(); p.Qzz += pQd.z();
 
         // Off diagonal
-        p.Qxy += d.Qxy - r.x()*d.Dy - r.y()*d.Dx + r.x()*r.y()*d.M;
-        p.Qxz += d.Qxz - r.x()*d.Dz - r.z()*d.Dx + r.x()*r.z()*d.M;
-        p.Qyz += d.Qyz - r.y()*d.Dz - r.z()*d.Dy + r.y()*r.z()*d.M;
+        const ArrayT pQod = ArrayT(d.Qxy,d.Qxz,d.Qyz) - r.xxy()*D.yzz()
+                          - r.yzz()*D.xxy() + r.xxy()*r.yzz()*d.M;
+        p.Qxy += pQod.x(); p.Qxz += pQod.y(); p.Qyz += pQod.z();
 
         // Recurse to compute the dipole
         moments_recurse<ScalarT,3,1>::exec(p, d, r);

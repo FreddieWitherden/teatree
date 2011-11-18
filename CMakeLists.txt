@@ -85,7 +85,6 @@ TODAY(TEATREE_BUILD_DATE)
 ##################################################
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-ADD_DEFINITIONS("-DTEATREE_HAVE_CONFIG_H")
 
 ##################################################
 # Source files
@@ -108,6 +107,7 @@ SET(TEATREE_HEADERS
     src/tree/branch.hpp
     src/tree/visitor.hpp
     src/utils/aligned_pool_allocator.hpp
+    src/utils/eigen_addons.hpp
     src/utils/ipow.hpp
     src/utils/openmp.hpp
     src/utils/pool_object.hpp
@@ -130,7 +130,7 @@ INCLUDE(BoostTestTargets)
 
 ADD_BOOST_TEST(tree
   SOURCES tests/tree.cpp
-  TESTS construction)
+  TESTS construction2d construction3d)
 ADD_BOOST_TEST(pusher
   SOURCES tests/pusher.cpp
   TESTS order)
