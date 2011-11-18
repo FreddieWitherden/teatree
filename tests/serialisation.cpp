@@ -20,7 +20,8 @@
 #define BOOST_TEST_MODULE serialisation
 
 #include <BoostTestTargetConfig.h>
-#include <boost/test/unit_test.hpp>
+
+#include "config.h"
 
 BOOST_AUTO_TEST_CASE(eigen)
 {

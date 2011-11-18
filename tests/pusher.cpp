@@ -21,6 +21,8 @@
 
 #include <BoostTestTargetConfig.h>
 
+#include "config.h"
+
 #include "particle/particle.hpp"
 #include "pusher/verlet.hpp"
 

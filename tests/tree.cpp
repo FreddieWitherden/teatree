@@ -21,6 +21,8 @@
 
 #include <BoostTestTargetConfig.h>
 
+#include "config.h"
+
 #include "particle/particle.hpp"
 #include "particle/make_pseudo_particle.hpp"
 
@@ -32,57 +34,46 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/covariance.hpp>
 #include <boost/accumulators/statistics/variates/covariate.hpp>
+#include <boost/assign/list_of.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include <boost/random/lagged_fibonacci.hpp>
 #include <boost/random/uniform_real.hpp>
 
 #include <vector>
 
 namespace acc = boost::accumulators;
+using namespace boost::assign;
 using namespace boost::random;
 using namespace Eigen;
 using namespace teatree;
-
-// Type of particle being used for the test
-typedef particle<Vector2d> particle_type;
-typedef pseudo_particle<particle_type,2> pseudo_particle_type;
 
 // The number of particles to use for testing
 const int N = 5000;
 const double TOL = 0.01;
 
-// Accumulator type required
-typedef acc::accumulator_set< double
-                            , acc::stats< acc::tag::mean
-                                        , acc::tag::min
-                                        , acc::tag::max
-                                        , acc::tag::lazy_variance
-                                        , acc::tag::covariance< double
-                                                              , acc::tag::covariate1
-                                                              >
-                                        >
-                            > acc_type;
-
 /**
  * A simple visitor to count the number of particles in the tree.
  */
+template<typename PParticleT>
 struct counting_visitor
-    : public tree_visitor<counting_visitor,pseudo_particle_type,int>
+    : public tree_visitor<counting_visitor<PParticleT>,PParticleT,int>
 {
-    bool accept(const pseudo_particle_type&) const { return false; }
-    int visit(const pseudo_particle_type&)   const { return 0; }
-    int visit(const particle_type&)          const { return 1; }
+    bool accept(const PParticleT&)                       const { return false; }
+    int visit(const PParticleT&)                         const { return 0; }
+    int visit(const typename PParticleT::particle_type&) const { return 1; }
 };
 
 /**
  * Walks the leaves of a tree computing the minimum position as it goes.
  *  This makes use of a custom reduction operator.
  */
-struct min_visitor : public tree_visitor< min_visitor
-                                        , pseudo_particle_type
-                                        , particle_type::array_type
+template<typename PParticleT>
+struct min_visitor : public tree_visitor< min_visitor<PParticleT>
+                                        , PParticleT
+                                        , typename PParticleT::array_type
                                         >
 {
-    typedef particle_type::array_type array_type;
+    TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
     bool accept(const pseudo_particle_type&)      const { return false; }
     array_type visit(const pseudo_particle_type&) const { return array_type(); }
@@ -93,16 +84,33 @@ struct min_visitor : public tree_visitor< min_visitor
 /**
  * Test the core elements of tree construction and visitation.
  */
-BOOST_AUTO_TEST_CASE(construction)
+BOOST_AUTO_TEST_CASE(construction2d)
 {
+    // Type of particle and visitors being used for the test
+    typedef particle<Vector2d> particle_type;
+    typedef pseudo_particle<particle_type,2> pseudo_particle_type;
+    typedef min_visitor<pseudo_particle_type> min_visitor_type;
+    typedef counting_visitor<pseudo_particle_type> counting_visitor_type;
+
     // Random number generation
     lagged_fibonacci607 eng(31415);
     uniform_real_distribution<> xdist(-50.0, 200.0), ydist(1, 200.0);
 
-    // Statistical accumulators
-    acc_type xacc, yacc;
+    /*
+     * Statistical accumulators; mean, min and max are for checking the core
+     * pseudo particle properties while the variance and covariance are for
+     * checking the quadrupole moments.
+     */
+    acc::accumulator_set< double
+                        , acc::stats< acc::tag::mean
+                                    , acc::tag::min
+                                    , acc::tag::max
+                                    , acc::tag::lazy_variance
+                                    , acc::tag::covariance< double
+                                                          , acc::tag::covariate1
+                        > > > xacc, yacc;
 
-    // Particles
+    // Particle storage
     std::vector<particle_type> p;
     p.reserve(N);
 
@@ -119,13 +127,13 @@ BOOST_AUTO_TEST_CASE(construction)
     const pseudo_particle_type pp = make_pseudo_particle<2>(p.begin(), p.end());
 
     // Create and run the minimum visitor over the leaf nodes
-    min_visitor mv;
+    min_visitor_type mv;
     const particle_type::array_type minv = pp.visit_children(mv);
 
     // Check particle count and net charge; N particles each with Q = +1
     BOOST_CHECK_EQUAL(pp.q(), N);
     BOOST_CHECK_EQUAL(pp.absq(), N);
-    BOOST_CHECK_EQUAL(pp.visit_children(counting_visitor()), N);
+    BOOST_CHECK_EQUAL(pp.visit_children(counting_visitor_type()), N);
 
     // Check CoQ given that the distribution is uniform in x and y
     BOOST_CHECK_CLOSE(pp.r().x(), acc::mean(xacc), TOL);
@@ -137,7 +145,7 @@ BOOST_AUTO_TEST_CASE(construction)
     BOOST_CHECK_EQUAL(pp.max().x(), acc::max(xacc));
     BOOST_CHECK_EQUAL(pp.max().y(), acc::max(yacc));
 
-    // These should agree with our custom min-visitor
+    // These should agree with our custom min_visitor
     BOOST_CHECK_EQUAL(pp.min().x(), minv.x());
     BOOST_CHECK_EQUAL(pp.min().y(), minv.y());
 
@@ -156,4 +164,85 @@ BOOST_AUTO_TEST_CASE(construction)
     // Off diagonal quadrupole moment should be N*Cov(p.x,p.y)
     BOOST_CHECK_CLOSE(acc::covariance(xacc), acc::covariance(yacc), TOL);
     BOOST_CHECK_CLOSE(pp.moments().Qxy, N*acc::covariance(xacc), TOL);
+}
+
+/**
+ * Tests tree construction in 3D; assumes 2D construction is functional.
+ */
+BOOST_AUTO_TEST_CASE(construction3d)
+{
+    // Type of particles used in the test
+    typedef particle<Vector3f> particle_type;
+    typedef pseudo_particle<particle_type,2> pseudo_particle_type;
+
+    // Random number generation, charge is biased towards +ve
+    lagged_fibonacci607 eng(27182);
+    uniform_real_distribution<float> xdist(-20.0, 20.0),
+                                     ydist(-20.0, 20.0),
+                                     zdist(  0.0, 10.0);
+    discrete_distribution<int,float> qdist = list_of(46)(100-46);
+
+    // CoQ accumulators; as Q = ±1 we can use the regular mean
+    acc::accumulator_set< float
+                        , acc::stats<acc::tag::mean>
+                        > xm, ym, zm;
+
+    // Multipole moment accumulators; we just need the sum
+    acc::accumulator_set< float
+                        , acc::stats<acc::tag::sum>
+                        > M, Dx, Dy, Dz, Qxx, Qyy, Qzz, Qxy, Qxz, Qyz;
+
+    // Particles
+    std::vector<particle_type> p;
+    p.reserve(N);
+
+    // Create the particles
+    for (int i = 0; i < N; ++i)
+    {
+        const float x = xdist(eng), y = ydist(eng), z = zdist(eng);
+        const float q = qdist(eng) ? 1 : -1;
+
+        xm(x); ym(y); zm(z);
+        p.push_back(particle_type(Vector3f(x,y,z), Vector3f::Zero(), q, 1));
+    }
+
+    // Create the tree
+    const pseudo_particle_type pp = make_pseudo_particle<2>(p.begin(), p.end());
+
+    // Manually compute the multipole moments
+    for (int i = 0; i < N; ++i)
+    {
+        const Vector3f R = p[i].r() - pp.r();
+        const float q    = p[i].q();
+
+        M(q);
+        Dx(q*R.x()); Dy(q*R.y()); Dz(q*R.z());
+        Qxx(q*R.x()*R.x()); Qyy(q*R.y()*R.y()); Qzz(q*R.z()*R.z());
+        Qxy(q*R.x()*R.y()); Qxz(q*R.x()*R.z()); Qyz(q*R.y()*R.z());
+    }
+
+    // Particle count, using Q = ±1
+    BOOST_CHECK_EQUAL(pp.absq(), N);
+
+    // CoQ
+    BOOST_CHECK_CLOSE(pp.r().x(), acc::mean(xm), TOL);
+    BOOST_CHECK_CLOSE(pp.r().y(), acc::mean(ym), TOL);
+    BOOST_CHECK_CLOSE(pp.r().z(), acc::mean(zm), TOL);
+
+    // Monopole moment
+    BOOST_CHECK_EQUAL(pp.moments().M, pp.q());
+    BOOST_CHECK_CLOSE(pp.moments().M, acc::sum(M), TOL);
+
+    // Dipole moment
+    BOOST_CHECK_CLOSE(pp.moments().Dx, acc::sum(Dx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Dy, acc::sum(Dy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Dz, acc::sum(Dz), TOL);
+
+    // Quadrupole moment
+    BOOST_CHECK_CLOSE(pp.moments().Qxx, acc::sum(Qxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qyy, acc::sum(Qyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qzz, acc::sum(Qzz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxy, acc::sum(Qxy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxz, acc::sum(Qxz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qyz, acc::sum(Qyz), TOL);
 }
