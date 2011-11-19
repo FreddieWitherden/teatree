@@ -22,7 +22,7 @@
 
 #include "mac/base.hpp"
 #include "particle/typedefs.hpp"
-#include "utils/simulation_options.hpp"
+#include "simulation/options.hpp"
 
 #include <string>
 
@@ -40,9 +40,9 @@ private:
 
 public:
     mac_opening_angle(const vector_type& r,
-                      const simulation_options& so)
+                      const simulation_options<scalar_type>& so)
         : mac_base<DerivedT,PParticleT,ReturnT>(r)
-        , theta_(so.find(theta_s_)->second)
+        , theta_(so.theta())
     {}
 
     bool accept(const PParticleT& p) const
@@ -55,11 +55,7 @@ public:
 
 private:
     const scalar_type theta_;
-    static const std::string theta_s_;
 };
-
-template<typename D, typename P, typename R>
-const std::string mac_opening_angle<D,P,R>::theta_s_("theta");
 
 }
 

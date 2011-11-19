@@ -17,18 +17,31 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_UTILS_SIMULATION_OPTIONS_HPP
-#define TEATREE_UTILS_SIMULATION_OPTIONS_HPP
-
-#include <map>
-#include <string>
+#ifndef TEATREE_SIMULATION_OPTIONS_HPP
+#define TEATREE_SIMULATION_OPTIONS_HPP
 
 namespace teatree
 {
 
-/// Map for run-time simulation options
-typedef std::map<std::string, double> simulation_options;
+/**
+ * Provides storage for runtime simulation options.
+ */
+template<typename ScalarT>
+class simulation_options
+{
+public: // Accessors
+    ScalarT epsilon() const { return epsilon_; }
+    ScalarT theta()   const { return theta_; }
+
+public: // Settors
+    simulation_options& epsilon(ScalarT s) { epsilon_ = s; return *this; }
+    simulation_options& theta(ScalarT s)   { theta_ = s; return *this; }
+
+private: // Members
+    ScalarT epsilon_;
+    ScalarT theta_;
+};
 
 }
 
-#endif // TEATREE_UTILS_SIMULATION_OPTIONS_HPP
+#endif // TEATREE_SIMULATION_OPTIONS_HPP
