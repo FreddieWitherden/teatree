@@ -50,8 +50,14 @@ IF(NOT CMAKE_BUILD_TYPE MATCHES Debug)
   INCLUDE(OptimizeForArchitecture)
   OptimizeForArchitecture()
   ADD_DEFINITIONS("-O3 -ffast-math")
+# For debug builds enable checked iterators
 ELSE()
   ADD_DEFINITIONS("-D_GLIBCXX_DEBUG")
+ENDIF()
+
+# For release builds remove all debugging info
+IF(CMAKE_BUILD_TYPE MATCHES Release)
+  ADD_DEFINITIONS("-DNDEBUG")
 ENDIF()
 
 ADD_DEFINITIONS("-W -Wall -Wno-unused-parameter -Wunused-variable -Wno-sign-compare")
@@ -104,6 +110,7 @@ SET(TEATREE_HEADERS
     src/particle/typedefs.hpp
     src/pusher/base.hpp
     src/pusher/verlet.hpp
+    src/simulation/options.hpp
     src/tree/branch.hpp
     src/tree/visitor.hpp
     src/utils/aligned_pool_allocator.hpp
@@ -111,8 +118,7 @@ SET(TEATREE_HEADERS
     src/utils/ipow.hpp
     src/utils/openmp.hpp
     src/utils/pool_object.hpp
-    src/utils/serialise_eigen.hpp
-    src/utils/simulation_options.hpp)
+    src/utils/serialise_eigen.hpp)
 
 ##################################################
 # Executable
