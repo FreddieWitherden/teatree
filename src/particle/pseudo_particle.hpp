@@ -27,6 +27,8 @@
 #include "tree/branch.hpp"
 #include "utils/ipow.hpp"
 
+#include <boost/assert.hpp>
+
 #include <Eigen/Core>
 
 
@@ -106,6 +108,9 @@ pseudo_particle<ParticleT,MultP>::pseudo_particle(
     pseudo_particle_visitor<pseudo_particle_type> pv;
     this->visit_children(pv);
     pv.reduce(moments_.M, absq_, r_, min_, max_, size_);
+
+    // We should never have a zero size
+    BOOST_ASSERT_MSG(size_ != 0, "Invalid pseudo particle size!");
 
     // Compute the higher order multipole moments (if any)
     moments_visitor<pseudo_particle_type> mv(moments_, r_);
