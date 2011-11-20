@@ -82,7 +82,7 @@ struct particle_moments<ScalarT,3,2> : public particle_moments<ScalarT,3,1>
     {}
 };
 
-/// 2D Octopole
+/// 2D Octupole
 template<typename ScalarT>
 struct particle_moments<ScalarT,2,3> : public particle_moments<ScalarT,2,2>
 {
@@ -92,7 +92,7 @@ struct particle_moments<ScalarT,2,3> : public particle_moments<ScalarT,2,2>
     particle_moments() : Oxxx(0.0), Oyyy(0.0), Oxxy(0.0), Oxyy(0.0) {}
 };
 
-/// 3D Octopole
+/// 3D Octupole
 template<typename ScalarT>
 struct particle_moments<ScalarT,3,3> : public particle_moments<ScalarT,3,2>
 {
