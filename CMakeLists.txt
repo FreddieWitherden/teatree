@@ -98,10 +98,11 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 SET(TEATREE_HEADERS
     src/mac/base.hpp
     src/mac/opening_angle.hpp
-    src/particle/detail/moments_recurse_2d.hpp
-    src/particle/detail/moments_recurse_3d.hpp
-    src/particle/detail/moments_recurse.hpp
-    src/particle/moments_visitor.hpp
+    src/particle/moments/shift_2d.hpp
+    src/particle/moments/shift_3d.hpp
+    src/particle/moments/shift_recurse.hpp
+    src/particle/moments/shift.hpp
+    src/particle/moments/visitor.hpp
     src/particle/moments.hpp
     src/particle/particle.hpp
     src/particle/partition.hpp

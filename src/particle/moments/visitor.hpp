@@ -20,7 +20,7 @@
 #ifndef TEATREE_PARTICLE_MOMENTS_VISITOR_HPP
 #define TEATREE_PARTICLE_MOMENTS_VISITOR_HPP
 
-#include "particle/detail/moments_recurse.hpp"
+#include "particle/moments/shift_recurse.hpp"
 #include "particle/typedefs.hpp"
 #include "tree/visitor.hpp"
 
@@ -39,10 +39,10 @@ class moments_visitor
 private: // Types
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    typedef detail::moments_recurse< scalar_type
-                                   , PParticleT::dimension
-                                   , PParticleT::multipole_order
-                                   > moments_recurse;
+    typedef moments_shift_recurse< scalar_type
+                                 , pseudo_particle_type::dimension
+                                 , pseudo_particle_type::multipole_order
+                                 > moments_shift_recuse_type;
 
 public: // Methods
     moments_visitor(particle_moments_type& m, const vector_type& r)
@@ -68,14 +68,14 @@ void moments_visitor<PParticleT>::visit(const particle_type& p)
     particle_moments_type p_moments;
     p_moments.M = p.q();
 
-    moments_recurse::exec(m_, p_moments, d);
+    moments_shift_recuse_type::exec(m_, p_moments, d);
 }
 
 template<typename PParticleT> inline
 void moments_visitor<PParticleT>::visit(const pseudo_particle_type& pp)
 {
     const array_type d = r_ - pp.r();
-    moments_recurse::exec(m_, pp.moments(), d);
+    moments_shift_recuse_type::exec(m_, pp.moments(), d);
 }
 
 }

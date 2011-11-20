@@ -17,57 +17,48 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_3D_HPP
-#define TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_3D_HPP
+#ifndef TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP
+#define TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP
 
-namespace teatree { namespace detail
+namespace teatree
 {
 
 /**
- * Computes the dipole moment in 3D.
+ * Shifts the dipole moment in 2D.
  */
 template<typename ScalarT>
-struct moments_recurse<ScalarT,3,1>
+struct moments_shift<ScalarT,2,1>
 {
-    typedef particle_moments<ScalarT,3,1> moments_type;
+    typedef particle_moments<ScalarT,2,1> moments_type;
 
     template<typename ArrayT>
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        const ArrayT pD = ArrayT(d.Dx,d.Dy,d.Dz) - r*d.M;
-        p.Dx += pD.x(); p.Dy += pD.y(); p.Dz += pD.z();
+        const ArrayT pD = ArrayT(d.Dx,d.Dy) - r*d.M;
+        p.Dx += pD.x(); p.Dy += pD.y();
     }
 };
 
 /**
- * Computes the dipole and quadrupole moments in 3D.
+ * Shifts the quadrupole moment in 2D.
  */
 template<typename ScalarT>
-struct moments_recurse<ScalarT,3,2>
+struct moments_shift<ScalarT,2,2>
 {
-    typedef particle_moments<ScalarT,3,2> moments_type;
+    typedef particle_moments<ScalarT,2,2> moments_type;
 
     template<typename ArrayT>
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        const ArrayT D(d.Dx,d.Dy,d.Dz);
-
-        // Diagonal
-        const ArrayT pQd = ArrayT(d.Qxx,d.Qyy,d.Qzz) - 2*r*D + r*r*d.M;
-        p.Qxx += pQd.x(); p.Qyy += pQd.y(); p.Qzz += pQd.z();
+        // Diagonal; compute Qxx and Qyy together
+        const ArrayT pQ = ArrayT(d.Qxx,d.Qyy) - 2*r*ArrayT(d.Dx,d.Dy) + r*r*d.M;
+        p.Qxx += pQ.x(); p.Qyy += pQ.y();
 
         // Off diagonal
-        const ArrayT pQod = ArrayT(d.Qxy,d.Qxz,d.Qyz) - r.xxy()*D.yzz()
-                          - r.yzz()*D.xxy() + r.xxy()*r.yzz()*d.M;
-        p.Qxy += pQod.x(); p.Qxz += pQod.y(); p.Qyz += pQod.z();
-
-        // Recurse to compute the dipole
-        moments_recurse<ScalarT,3,1>::exec(p, d, r);
+        p.Qxy += d.Qxy - r.x()*d.Dy - r.y()*d.Dx + r.x()*r.y()*d.M;
     }
 };
 
 }
 
-}
-
-#endif // TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_3D_HPP
+#endif // TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP

@@ -21,7 +21,7 @@
 #define TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP
 
 #include "particle/moments.hpp"
-#include "particle/moments_visitor.hpp"
+#include "particle/moments/visitor.hpp"
 #include "particle/pseudo_particle_visitor.hpp"
 #include "particle/typedefs.hpp"
 #include "tree/branch.hpp"

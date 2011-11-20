@@ -17,43 +17,42 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_HPP
-#define TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_HPP
+#ifndef TEATREE_PARTICLE_MOMENTS_SHIFT_RECURSE_HPP
+#define TEATREE_PARTICLE_MOMENTS_SHIFT_RECURSE_HPP
 
-#include <boost/static_assert.hpp>
+#include "particle/moments/shift.hpp"
 
-namespace teatree { namespace detail
+namespace teatree
 {
 
-/**
- * Catch all template to detect unsupported multipole orders.
- */
 template<typename ScalarT, int Dim, int MultP>
-struct moments_recurse
+struct moments_shift_recurse
 {
-    // Static assert
-    BOOST_STATIC_ASSERT_MSG(sizeof(ScalarT) == 0, "Invalid multipole order.");
+    typedef particle_moments<ScalarT,Dim,MultP> moments_type;
+
+    template<typename ArrayT>
+    static void exec(moments_type& m, const moments_type& d, const ArrayT& r)
+    {
+        // Shift the MultP moment
+        moments_shift<ScalarT,Dim,MultP>::exec(m, d, r);
+
+        // Recurse to sort the remaining moments
+        moments_shift_recurse<ScalarT,Dim,MultP-1>::exec(m, d, r);
+    }
 };
 
-/**
- * Monopole moment (net charge) in either 2D or 3D.  This is a no-op as the
- *  net charge is computed by pseudo_particle_visitor.
- */
 template<typename ScalarT, int Dim>
-struct moments_recurse<ScalarT,Dim,0>
+struct moments_shift_recurse<ScalarT,Dim,0>
 {
     typedef particle_moments<ScalarT,Dim,0> moments_type;
 
     template<typename ArrayT>
-    static void exec(moments_type&, const moments_type&, const ArrayT&) {}
+    static void exec(moments_type&, const moments_type&, const ArrayT&)
+    {
+        // No-op as the monopole moment does not require shifting
+    }
 };
 
 }
 
-}
-
-// Include the specializations for 2D and 3D
-#include "particle/detail/moments_recurse_2d.hpp"
-#include "particle/detail/moments_recurse_3d.hpp"
-
-#endif // TEATREE_PARTICLE_DETAIL_MOMENTS_RECURSE_HPP
+#endif // TEATREE_PARTICLE_MOMENTS_SHIFT_RECURSE_HPP
