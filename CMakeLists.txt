@@ -60,7 +60,7 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
   ADD_DEFINITIONS("-DNDEBUG")
 ENDIF()
 
-ADD_DEFINITIONS("-W -Wall -Wno-unused-parameter -Wunused-variable -Wno-sign-compare")
+ADD_DEFINITIONS("-W -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare")
 
 ##################################################
 # OpenMP
