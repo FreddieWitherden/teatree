@@ -27,8 +27,8 @@
 #include "tree/branch.hpp"
 #include "utils/ipow.hpp"
 
+#include <cmath>
 #include <boost/assert.hpp>
-
 #include <Eigen/Core>
 
 
@@ -81,9 +81,10 @@ public: // Accessors
     const array_type& min() const { return min_; }
     const array_type& max() const { return max_; }
 
-    scalar_type q()    const { return moments_.M; }
-    scalar_type absq() const { return absq_; }
-    scalar_type size() const { return size_; }
+    scalar_type q()     const { return moments_.M; }
+    scalar_type absq()  const { return absq_; }
+    scalar_type size()  const { return std::sqrt(size2_); }
+    scalar_type size2() const { return size2_; }
 
     const particle_moments_type& moments() const { return moments_; }
 
@@ -92,7 +93,7 @@ private:
     array_type  min_;
     array_type  max_;
     scalar_type absq_;
-    scalar_type size_;
+    scalar_type size2_;
     particle_moments_type moments_;
 };
 
@@ -107,10 +108,10 @@ pseudo_particle<ParticleT,MultP>::pseudo_particle(
     // Visit our children to determine our aggregate properties
     pseudo_particle_visitor<pseudo_particle_type> pv;
     this->visit_children(pv);
-    pv.reduce(moments_.M, absq_, r_, min_, max_, size_);
+    pv.reduce(moments_.M, absq_, r_, min_, max_, size2_);
 
     // We should never have a zero size
-    BOOST_ASSERT_MSG(size_ != 0, "Invalid pseudo particle size!");
+    BOOST_ASSERT_MSG(size2_ != 0, "Invalid pseudo particle size!");
 
     // Compute the higher order multipole moments (if any)
     moments_visitor<pseudo_particle_type> mv(moments_, r_);

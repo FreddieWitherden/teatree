@@ -42,19 +42,19 @@ public:
     mac_opening_angle(const vector_type& r,
                       const simulation_options<scalar_type>& so)
         : mac_base<DerivedT,PParticleT,ReturnT>(r)
-        , theta_(so.theta())
+        , theta2_(so.theta()*so.theta())
     {}
 
     bool accept(const PParticleT& p) const
     {
-        const scalar_type d = (this->r_ - p.r()).norm();
-        const scalar_type s = p.size();
+        const scalar_type d2 = (this->r_ - p.r()).squaredNorm();
+        const scalar_type s2 = p.size2();
 
-        return s/d < theta_;
+        return s2 < d2*theta2_;
     }
 
 private:
-    const scalar_type theta_;
+    const scalar_type theta2_;
 };
 
 }

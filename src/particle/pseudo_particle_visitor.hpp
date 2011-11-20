@@ -47,7 +47,7 @@ public:
     void visit(const PParticleT& pp);
 
     void reduce(scalar_type& q, scalar_type& absq, vector_type& coq,
-                array_type& min, array_type& max, scalar_type& size);
+                array_type& min, array_type& max, scalar_type& size2);
 
 private:
     template<typename P>
@@ -80,16 +80,16 @@ void pseudo_particle_visitor<PParticleT>::visit(const PParticleT& p)
 template<typename PParticleT> inline
 void pseudo_particle_visitor<PParticleT>::reduce
     (scalar_type& q, scalar_type& absq, vector_type& coq,
-     array_type& min, array_type& max, scalar_type& size)
+     array_type& min, array_type& max, scalar_type& size2)
 {
     BOOST_ASSERT(!first_);
 
-    q    = sum_q_;
-    absq = sum_absq_;
-    coq  = sum_absq_r_/sum_absq_;
-    min  = min_;
-    max  = max_;
-    size = (max_ - min_).matrix().norm();
+    q     = sum_q_;
+    absq  = sum_absq_;
+    coq   = sum_absq_r_/sum_absq_;
+    min   = min_;
+    max   = max_;
+    size2 = (max_ - min_).matrix().squaredNorm();
 }
 
 template<typename PParticleT>
