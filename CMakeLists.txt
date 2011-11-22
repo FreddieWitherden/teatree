@@ -22,7 +22,11 @@ INCLUDE_DIRECTORIES(src)
 # External dependencies
 ##################################################
 
-SET(TEATREE_BOOST_LIBS program_options serialization unit_test_framework)
+SET(TEATREE_BOOST_LIBS
+    chrono
+    program_options
+    serialization
+    unit_test_framework)
 
 # Find boost
 FIND_PACKAGE(Boost REQUIRED ${TEATREE_BOOST_LIBS})
