@@ -40,8 +40,9 @@ public:
     pusher_verlet(const ForwardRangeT& in,
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
+        , accel_(this->nparticles_)
         , tmp_(in.begin(), in.end())
-    { accel_.reserve(this->nparticles_); }
+    {}
 
 public:
     void take_step(const random_access_range& in,
