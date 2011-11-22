@@ -30,8 +30,6 @@
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 
-#include "utils/serialise_eigen.hpp"
-
 namespace teatree
 {
 

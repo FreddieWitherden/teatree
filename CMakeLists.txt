@@ -122,8 +122,7 @@ SET(TEATREE_HEADERS
     src/utils/eigen_addons.hpp
     src/utils/ipow.hpp
     src/utils/openmp.hpp
-    src/utils/pool_object.hpp
-    src/utils/serialise_eigen.hpp)
+    src/utils/pool_object.hpp)
 
 ##################################################
 # Executable
@@ -145,6 +144,7 @@ ADD_BOOST_TEST(tree
 ADD_BOOST_TEST(pusher
   SOURCES tests/pusher.cpp
   TESTS order)
-ADD_BOOST_TEST(serialisation
-  SOURCES tests/serialisation.cpp
-  TESTS eigen)
+ADD_BOOST_TEST(serialization
+  SOURCES tests/serialization.cpp
+  TESTS eigen
+  LIBRARIES ${Boost_LIBRARIES})

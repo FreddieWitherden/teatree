@@ -40,3 +40,15 @@ PER3(z,x,x) PER3(z,x,y) PER3(z,x,z)
 PER3(z,y,x) PER3(z,y,y) PER3(z,y,z)
 PER3(z,z,x) PER3(z,z,y) PER3(z,z,z)
 #undef PER3
+
+/**
+ * boost::serialization support; this is only intended for fixed-size
+ *  Eigen types.
+ */
+template<typename ArchiveT>
+void serialize(ArchiveT& ar, unsigned int /*version*/)
+{
+    for (int i = 0; i < this->rows(); ++i)
+        for (int j = 0; j < this->cols(); ++j)
+            ar & (*this)(i, j);
+}
