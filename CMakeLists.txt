@@ -102,6 +102,11 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 SET(TEATREE_HEADERS
     src/mac/base.hpp
     src/mac/opening_angle.hpp
+    src/efield/moments/moments_2d.hpp
+    src/efield/moments/moments_3d.hpp
+    src/efield/moments/recurse.hpp
+    src/efield/base.hpp
+    src/efield/plummer.hpp
     src/particle/moments/shift_2d.hpp
     src/particle/moments/shift_3d.hpp
     src/particle/moments/shift_recurse.hpp
@@ -141,6 +146,9 @@ INCLUDE(BoostTestTargets)
 ADD_BOOST_TEST(tree
   SOURCES tests/tree.cpp
   TESTS construction2d construction3d)
+ADD_BOOST_TEST(fields
+  SOURCES tests/fields.cpp
+  TESTS plummer2d pseudo2d)
 ADD_BOOST_TEST(pusher
   SOURCES tests/pusher.cpp
   TESTS order)
