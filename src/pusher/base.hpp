@@ -54,9 +54,7 @@ template<typename AccelEvalT>
 class pusher_base
 {
 public: // Types
-    typedef typename AccelEvalT::particle_type  particle_type;
-    typedef typename particle_type::scalar_type scalar_type;
-    typedef typename particle_type::vector_type vector_type;
+    TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename AccelEvalT::particle_type);
 
 protected:
     typedef std::vector<particle_type> random_access_range;
