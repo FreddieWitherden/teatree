@@ -98,11 +98,16 @@ public: // Accessors
 
 public: // Simulation control
     /**
-     * Advances the simulation to a time >= newt and places the resulting
-     *  particles into the passed output iterator.
+     * Advances the simulation by a time step dt.
+     */
+    void advance();
+
+    /**
+     *
      */
     template<typename OutputItT>
-    void advance(scalar_type newt, OutputItT out);
+    void output(OutputItT out)
+    { rng::copy(pcurr_, out); }
 
 protected: // Virtuals
 
@@ -136,29 +141,22 @@ protected: // Protected members
     /// The simulation time step.
     const scalar_type dt_;
 
-private: // Members variables
+private: // Private member variables
     std::vector<particle_type> pcurr_;
     std::vector<particle_type> ptemp_;
 };
 
 template<typename AccelEvalT>
-template<typename OutputItT>
-void pusher_base<AccelEvalT>::advance(scalar_type newt, OutputItT out)
+void pusher_base<AccelEvalT>::advance()
 {
-    while (t_ < newt)
-    {
-        // Take a step using the solver
-        take_step(pcurr_, ptemp_);
+    // Take a step using the solver
+    take_step(pcurr_, ptemp_);
 
-        // Update the current time
-        t_ = ++nsteps_ * dt_;
+    // Update the current time
+    t_ = ++nsteps_ * dt_;
 
-        // Swizzle the current and temp vectors
-        boost::swap(pcurr_, ptemp_);
-    }
-
-    // Copy the output to the output iterator
-    rng::copy(pcurr_, out);
+    // Swizzle the current and temp vectors
+    boost::swap(pcurr_, ptemp_);
 }
 
 }

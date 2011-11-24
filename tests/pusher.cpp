@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_CASE(order)
 
     // Solver
     pusher_verlet<arenstorf> verlet(p, arenstorf(), 0, 0.0001);
-    verlet.advance(17.06521656015796, &newp);
+    while (verlet.t() < 17.06521656015796) verlet.advance();
+    verlet.output(&newp);
 
     BOOST_CHECK_CLOSE(newp.r().x(), p.front().r().x(), 1.0);
     BOOST_CHECK_SMALL(newp.r().y(), 0.025);
