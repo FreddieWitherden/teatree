@@ -45,7 +45,7 @@ class efield_plummer : public efield_base< efield_plummer<PParticleT,MacT,MulP>
                                          , MulP
                                          >
 {
-private: // Internal convenience typedef's
+public: // Internal convenience typedef's
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
     typedef efield_base< efield_plummer<PParticleT,MacT,MulP>
