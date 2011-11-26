@@ -29,14 +29,8 @@
 #include <boost/utility/result_of.hpp>
 #include <boost/variant.hpp>
 
-namespace teatree { namespace tree_branch_
+namespace teatree
 {
-
-using boost::apply_visitor;
-using boost::array;
-using boost::get;
-using boost::result_of;
-using boost::variant;
 
 /**
  * An abstract tree branch.
@@ -47,7 +41,9 @@ class tree_branch : public pool_object<BranchT>
 public: // Types & constants
     typedef LeafT   leaf_type;
     typedef BranchT branch_type;
-    typedef variant<leaf_type*,branch_type*> node_type;
+    typedef boost::variant < leaf_type*,
+                             branch_type*
+                           > node_type;
 
     enum constants {
         dimension    = D,
@@ -87,7 +83,7 @@ private:
     void visit_children(tag<void>, VisitorT& tv) const;
 
 protected:
-    array<node_type,max_children> children_;
+    boost::array<node_type,max_children> children_;
     int num_children_;
 };
 
@@ -99,8 +95,9 @@ tree_branch<LeafT,BranchT,D>::tree_branch(
     IteratorT last)
     : num_children_(0)
 {
-    typedef typename result_of<PartFactT(IteratorT,IteratorT)>::type
-                     partition_type;
+    typedef typename boost::result_of <
+                                        PartFactT(IteratorT,IteratorT)
+                                      >::type partition_type;
 
     // Create a partition object to subdivide the branch
     partition_type p(partition_factory(first, last));
@@ -135,7 +132,7 @@ tree_branch<LeafT,BranchT,D>::~tree_branch()
      * them in to make the allocator's life easier.
      */
     for (int i = num_children_; --i != -1;)
-        if (branch_type** b = get<branch_type*>(&children_[i]))
+        if (branch_type** b = boost::get<branch_type*>(&children_[i]))
             delete *b;
 }
 
@@ -145,11 +142,11 @@ ReturnT tree_branch<LeafT,BranchT,D>::visit_children
     (tag<ReturnT>, VisitorT& tv) const
 {
     // Visit the our first child to get the return value
-    ReturnT ret = apply_visitor(tv, children_[0]);
+    ReturnT ret = boost::apply_visitor(tv, children_[0]);
 
     // Visit our remaining children applying the reduction as we go
     for (int i = 1; i < num_children_; ++i)
-        tv(ret, apply_visitor(tv, children_[i]));
+        tv(ret, boost::apply_visitor(tv, children_[i]));
 
     return ret;
 }
@@ -160,12 +157,8 @@ void tree_branch<LeafT,BranchT,D>::visit_children
     (tag<void>, VisitorT& tv) const
 {
     for (int i = 0; i < num_children_; ++i)
-        apply_visitor(tv, children_[i]);
+        boost::apply_visitor(tv, children_[i]);
 }
-
-}
-
-using tree_branch_::tree_branch;
 
 }
 
