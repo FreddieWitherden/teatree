@@ -39,7 +39,7 @@ namespace teatree
  * A pseudo particle.
  */
 template<typename ParticleT, int MultP>
-class pseudo_particle : public tree_branch< ParticleT
+class pseudo_particle : public tree_branch< const ParticleT
                                           , pseudo_particle<ParticleT,MultP>
                                           , ParticleT::dimension
                                           >
@@ -55,7 +55,7 @@ public: // Types & constants
         num_children    = ipow<2,dimension>::value
     };
 
-    typedef tree_branch< ParticleT
+    typedef tree_branch< const ParticleT
                        , pseudo_particle_type
                        , ParticleT::dimension
                        > base_type;
