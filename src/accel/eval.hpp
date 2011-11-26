@@ -26,6 +26,8 @@
 
 #include <boost/assert.hpp>
 #include <boost/iterator/counting_iterator.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include <vector>
 
@@ -43,7 +45,9 @@ public: // Types & constants
     enum constants { multipole_order = pseudo_particle_type::multipole_order };
 
 public: // Constructors
-    accel_eval(int N, const simulation_options<scalar_type>& so)
+    accel_eval() {}
+
+    accel_eval(int N, const simulation_options& so)
         : idx_(counting_iterator<int>(0), counting_iterator<int>(N))
         , so_(so)
     {}
@@ -53,16 +57,22 @@ public: // Constructors
                     const RandomInputRangeT& in,
                     RandomOutputRangeT& out);
 
-private:
+private: // Serialization
+    friend class boost::serialization::access;
+
+    template<typename ArchiveT>
+    void serialize(ArchiveT& ar, unsigned /*file version*/);
+
+private: // Member variables
     std::vector<int> idx_;
-    simulation_options<scalar_type> so_;
+    simulation_options so_;
 };
 
 template<typename EfieldT>
 template<typename RandomInputRangeT, typename RandomOutputRangeT>
 void accel_eval<EfieldT>::operator()(scalar_type t,
-                                                const RandomInputRangeT& in,
-                                                RandomOutputRangeT& out)
+                                     const RandomInputRangeT& in,
+                                     RandomOutputRangeT& out)
 {
     // Build the tree to yield a pseudo particle
     const pseudo_particle_type pp = make_pseudo_particle<multipole_order>
@@ -77,6 +87,14 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
 
         out[i] = p.qtom()*pp.visit_children(EfieldT(p.r(), so_));
     }
+}
+
+template<typename EfieldT>
+template<typename ArchiveT>
+void accel_eval<EfieldT>::serialize(ArchiveT& ar, unsigned)
+{
+    ar & idx_;
+    ar & so_;
 }
 
 }

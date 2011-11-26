@@ -25,6 +25,11 @@
 #include <vector>
 
 #include <boost/range/algorithm/copy.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/scoped_ptr.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/vector.hpp>
 #include <boost/swap.hpp>
 
 /**
@@ -46,6 +51,7 @@ namespace teatree { namespace pusher_base_
 {
 
 namespace rng = boost::range;
+using boost::scoped_ptr;
 
 /**
  * Base particle pusher class.
@@ -62,11 +68,14 @@ protected:
     typedef AccelEvalT accel_eval_type;
 
 public: // Constructors
+    pusher_base() {}
+
     template<typename ForwardRangeT>
     pusher_base(const ForwardRangeT& in,
-                accel_eval_type acceleval, scalar_type t0, scalar_type dt)
+                const accel_eval_type& acceleval,
+                scalar_type t0, scalar_type dt)
         : nparticles_(in.size())
-        , acceleval_(acceleval)
+        , acceleval_(new accel_eval_type(acceleval))
         , nacceleval_(0), nsteps_(0)
         , t_(t0), dt_(dt)
         , pcurr_(in.begin(), in.end())
@@ -121,13 +130,24 @@ protected: // Virtuals
     void accel_eval(scalar_type t,
                     const RandomInputRangeT& in,
                     RandomOutputRangeT& out)
-    { acceleval_(t, in, out); ++nacceleval_; }
+    { (*acceleval_)(t, in, out); ++nacceleval_; }
+
+private: // Serialization
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+    template<typename ArchiveT>
+    void save(ArchiveT& ar, unsigned /*file version*/) const;
+
+    template<typename ArchiveT>
+    void load(ArchiveT& ar, unsigned /*file version*/);
 
 protected: // Protected members
     /// The number of particles (equations) being pushed.
-    const int nparticles_;
+    int nparticles_;
 
-    accel_eval_type acceleval_;
+    scoped_ptr<accel_eval_type> acceleval_;
 
     /// The number of acceleration evaluations thus far.
     int nacceleval_;
@@ -139,7 +159,7 @@ protected: // Protected members
     scalar_type t_;
 
     /// The simulation time step.
-    const scalar_type dt_;
+    scalar_type dt_;
 
 private: // Private member variables
     std::vector<particle_type> pcurr_;
@@ -157,6 +177,33 @@ void pusher_base<AccelEvalT>::advance()
 
     // Swizzle the current and temp vectors
     boost::swap(pcurr_, ptemp_);
+}
+
+template<typename AccelEvalT>
+template<typename ArchiveT>
+void pusher_base<AccelEvalT>::save(ArchiveT& ar, unsigned /*file version*/) const
+{
+    ar << acceleval_;
+    ar << nacceleval_;
+    ar << nsteps_;
+    ar << dt_;
+    ar << pcurr_;
+}
+
+template<typename AccelEvalT>
+template<typename ArchiveT>
+void pusher_base<AccelEvalT>::load(ArchiveT& ar, unsigned /*file version*/)
+{
+    ar >> acceleval_;
+    ar >> nacceleval_;
+    ar >> nsteps_;
+    ar >> dt_;
+    ar >> pcurr_;
+
+    // We can synthesize the remaining quantities
+    t_ = nsteps_*dt_;
+    ptemp_ = pcurr_;
+    nparticles_ = pcurr_.size();
 }
 
 }

@@ -44,7 +44,7 @@ struct efield_base
 
     typedef MacT<DerivedT,PParticleT,vector_type> base_type;
 
-    efield_base(const vector_type& r, const simulation_options<scalar_type>& so)
+    efield_base(const vector_type& r, const simulation_options& so)
         : base_type(r, so)
     {}
 

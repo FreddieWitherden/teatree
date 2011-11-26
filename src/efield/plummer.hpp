@@ -56,7 +56,7 @@ public: // Internal convenience typedef's
 
 public: // Methods
     efield_plummer(const vector_type& r,
-            const simulation_options<scalar_type>& so)
+            const simulation_options& so)
         : base_type(r, so)
         , epsilon2_(so.epsilon()*so.epsilon())
     {}

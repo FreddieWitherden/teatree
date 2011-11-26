@@ -153,5 +153,5 @@ ADD_BOOST_TEST(pusher
   TESTS order)
 ADD_BOOST_TEST(serialization
   SOURCES tests/serialization.cpp
-  TESTS eigen
+  TESTS eigen simulation_options_t accel_eval_t pusher_verlet_t
   LIBRARIES ${Boost_LIBRARIES})

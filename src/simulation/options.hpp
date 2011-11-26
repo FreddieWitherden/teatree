@@ -20,27 +20,51 @@
 #ifndef TEATREE_SIMULATION_OPTIONS_HPP
 #define TEATREE_SIMULATION_OPTIONS_HPP
 
+#include <boost/serialization/access.hpp>
+
+#include <stdexcept>
+
 namespace teatree
 {
 
 /**
  * Provides storage for runtime simulation options.
  */
-template<typename ScalarT>
 class simulation_options
 {
 public: // Accessors
-    ScalarT epsilon() const { return epsilon_; }
-    ScalarT theta()   const { return theta_; }
+    double epsilon() const { return epsilon_; }
+    double theta()   const { return theta_; }
 
 public: // Settors
-    simulation_options& epsilon(ScalarT s) { epsilon_ = s; return *this; }
-    simulation_options& theta(ScalarT s)   { theta_ = s; return *this; }
+    simulation_options& epsilon(double s)
+    {
+        if (s <= 0) throw std::invalid_argument("Bad epsilon");
+        epsilon_ = s; return *this;
+    }
+
+    simulation_options& theta(double s)
+    {
+        if (s < 0.0 || s >= 1.0) throw std::invalid_argument("Bad theta");
+        theta_ = s; return *this;
+    }
+
+private: // Serialization
+    friend class boost::serialization::access;
+
+    template<typename ArchiveT>
+    void serialize(ArchiveT& ar, unsigned /*file version*/)
+    {
+        ar & epsilon_;
+        ar & theta_;
+    }
 
 private: // Members
-    ScalarT epsilon_;
-    ScalarT theta_;
+    double epsilon_;
+    double theta_;
 };
+
+
 
 }
 

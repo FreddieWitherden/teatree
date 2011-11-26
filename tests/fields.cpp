@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include "accel/eval.hpp"
 #include "efield/plummer.hpp"
 #include "particle/particle.hpp"
 #include "particle/make_pseudo_particle.hpp"
@@ -62,7 +63,7 @@ BOOST_AUTO_TEST_CASE(plummer2d)
     const particle_type p1(Vector2d( 5.0, 0.0), Vector2d::Zero(), -1, 1);
 
     // Some simple simulation options
-    simulation_options<double> so; so.epsilon(EPSILON).theta(0.0);
+    simulation_options so; so.epsilon(EPSILON).theta(0.0);
 
     const efield_type ef0(p0.r(), so), ef1(p1.r(), so);
 
@@ -87,7 +88,7 @@ BOOST_AUTO_TEST_CASE(pseudo2d)
 {
     typedef particle<Vector2d> particle_type;
     typedef pseudo_particle<particle_type,2> pseudo_particle_type;
-    typedef simulation_options<double> options_type;
+    typedef simulation_options options_type;
     typedef efield_plummer<pseudo_particle_type,mac_opening_angle,0> ef_m_type;
     typedef efield_plummer<pseudo_particle_type,mac_opening_angle,1> ef_d_type;
     typedef efield_plummer<pseudo_particle_type,mac_opening_angle,2> ef_q_type;
@@ -122,6 +123,9 @@ BOOST_AUTO_TEST_CASE(pseudo2d)
 
     // Count the number of failures
     int nfail_md = 0, nfail_dq = 0, nfail_mq = 0;
+
+    options_type opt; opt.epsilon(EPSILON).theta(0.6);
+    accel_eval<ef_q_type> ae(N, opt);
 
     BOOST_FOREACH(const particle_type& tp, p)
     {

@@ -22,6 +22,9 @@
 
 #include "pusher/base.hpp"
 
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <vector>
 
 namespace teatree
@@ -36,17 +39,30 @@ class pusher_verlet : public pusher_base<AccelEvalT>
 public:
     TEATREE_PUSHER_GENERATE_TYPEDEFS(AccelEvalT);
 
+    pusher_verlet() {}
+
     template<typename ForwardRangeT>
     pusher_verlet(const ForwardRangeT& in,
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
         , accel_(this->nparticles_)
-        , tmp_(in.begin(), in.end())
+        , tmp_(this->nparticles_)
     {}
 
 public:
     void take_step(const random_access_range& in,
                    random_access_range& out);
+
+private: // Serialization
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+    template<typename ArchiveT>
+    void save(ArchiveT& ar, unsigned /*file version*/) const;
+
+    template<typename ArchiveT>
+    void load(ArchiveT& ar, unsigned /*file version*/);
 
 private:
     std::vector<vector_type> accel_;
@@ -78,6 +94,24 @@ void pusher_verlet<AccelEvalT>::take_step
         out[i].r() = tmp_[i].r();
         out[i].v() = tmp_[i].v() + dt_/2*accel_[i];
     }
+}
+
+template<typename AccelEvalT>
+template<typename ArchiveT>
+void pusher_verlet<AccelEvalT>::save(ArchiveT& ar, unsigned) const
+{
+    ar << boost::serialization::base_object<base_type>(*this);
+}
+
+template<typename AccelEvalT>
+template<typename ArchiveT>
+void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
+{
+    ar >> boost::serialization::base_object<base_type>(*this);
+
+    // Resize our member vectors
+    accel_.resize(this->nparticles_);
+    tmp_.resize(this->nparticles_);
 }
 
 }

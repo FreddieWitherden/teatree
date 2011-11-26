@@ -40,7 +40,7 @@ private:
 
 public:
     mac_opening_angle(const vector_type& r,
-                      const simulation_options<scalar_type>& so)
+                      const simulation_options& so)
         : mac_base<DerivedT,PParticleT,ReturnT>(r)
         , theta2_(so.theta()*so.theta())
     {}
