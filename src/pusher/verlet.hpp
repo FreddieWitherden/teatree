@@ -25,6 +25,7 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <iterator>
 #include <vector>
 
 namespace teatree
@@ -46,7 +47,7 @@ public:
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
         , accel_(this->nparticles_)
-        , tmp_(this->nparticles_)
+        , tmp_(in.begin(), in.end())
     {}
 
 public:
@@ -109,9 +110,16 @@ void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
 {
     ar >> boost::serialization::base_object<base_type>(*this);
 
-    // Resize our member vectors
+    // Resize the acceleration vector to hold the right number of particles
     accel_.resize(this->nparticles_);
-    tmp_.resize(this->nparticles_);
+
+    /*
+     * Although tmp_ is only a temporary particle vector it is required
+     * that q() and qtom() be valid as these are not set by take_step.
+     * Hence we initialise tmp_ with the current particle vector.
+     */
+    tmp_.reserve(this->nparticles_);
+    output(std::back_inserter(tmp_));
 }
 
 }
