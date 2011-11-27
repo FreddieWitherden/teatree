@@ -22,6 +22,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iosfwd>
+#include <iomanip>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/serialization.hpp>
@@ -57,6 +59,7 @@ public: // Accessor methods
     const vector_type& v()    const { return v_; }
     const scalar_type  q()    const { return q_; }
     const scalar_type  absq() const { return std::fabs(q_); }
+    const scalar_type  m()    const { return q_/qtom_; }
     const scalar_type  qtom() const { return qtom_; }
 
     vector_type& r() { return r_; }
@@ -88,8 +91,8 @@ template<typename VectorT> inline
 particle<VectorT>::particle()
     : r_(vector_type::Zero())
     , v_(vector_type::Zero())
-    , q_(0.0)
-    , qtom_(0.0)
+    , q_(1.0)
+    , qtom_(1.0)
 {}
 
 template<typename VectorT> inline
@@ -108,6 +111,22 @@ void particle<VectorT>::serialize(ArchiveT& ar, unsigned int)
     ar & v_;
     ar & q_;
     ar & qtom_;
+}
+
+template<typename VectorT>
+std::ostream& operator<<(std::ostream& os, const particle<VectorT>& p)
+{
+    std::ostringstream ss;
+    ss << std::setprecision(5) << std::scientific;
+
+    for (int i = 0; i < particle<VectorT>::dimension; ++i)
+        ss << std::setw(14) << p.r()[i];
+    for (int i = 0; i < particle<VectorT>::dimension; ++i)
+        ss << std::setw(14) << p.v()[i];
+    ss << std::resetiosflags(std::ios::scientific) << std::setprecision(3);
+    ss << std::setw(7) << p.q() << std::setw(7) << p.m();
+
+    return os << ss.str();
 }
 
 }
