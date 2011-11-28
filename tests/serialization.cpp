@@ -74,8 +74,6 @@ static void serialize_cmp(const T& t1, const T& t2)
     binary_oarchive oa1(ss1), oa2(ss2);
     oa1 << t1; oa2 << t2;
 
-    std::cout << ss1.str().length() << std::endl;
-
     BOOST_CHECK_EQUAL(ss1.str(), ss2.str());
 }
 
@@ -174,8 +172,6 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
 
     // Advance both objects a few more times
     for (int i = 0; i < 20; ++i) pusher.advance(), pusher_mid.advance();
-
-    pusher.output(std::ostream_iterator<particle_type>(std::cout,"\n"));
 
     // Check that both give the same result
     serialize_cmp(pusher, pusher_mid);
