@@ -24,6 +24,7 @@
 #include <cmath>
 #include <iosfwd>
 #include <iomanip>
+#include <string>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/serialization.hpp>
@@ -113,6 +114,25 @@ void particle<VectorT>::serialize(ArchiveT& ar, unsigned int)
     ar & qtom_;
 }
 
+/**
+ * Writes a suitable set of column heading to the stream that describe
+ *  the columns of output produced by std::ostream& << particle.
+ */
+template<typename ParticleT>
+std::string particle_format_header()
+{
+    const char* colh = "xyz";
+    std::ostringstream ss;
+
+    for (int i = 0; i < ParticleT::dimension; ++i)
+        ss << "   r" << std::setw(10) << std::left << colh[i];
+    for (int i = 0; i < ParticleT::dimension; ++i)
+        ss << "   v" << std::setw(10) << std::left << colh[i];
+    ss << std::setw(10) << "   q" << std::setw(7) << 'm';
+
+    return ss.str();
+}
+
 template<typename VectorT>
 std::ostream& operator<<(std::ostream& os, const particle<VectorT>& p)
 {
@@ -127,6 +147,23 @@ std::ostream& operator<<(std::ostream& os, const particle<VectorT>& p)
     ss << std::setw(7) << p.q() << std::setw(7) << p.m();
 
     return os << ss.str();
+}
+
+template<typename VectorT>
+std::istream& operator>>(std::istream& is, particle<VectorT>& p)
+{
+    typename particle<VectorT>::vector_type r, v;
+    typename particle<VectorT>::scalar_type q, m;
+
+    for (int i = 0; i < particle<VectorT>::dimension; ++i)
+        is >> r[i];
+    for (int i = 0; i < particle<VectorT>::dimension; ++i)
+        is >> v[i];
+    is >> q >> m;
+
+    p = particle<VectorT>(r, v, q, m);
+
+    return is;
 }
 
 }
