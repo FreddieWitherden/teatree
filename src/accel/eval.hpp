@@ -40,6 +40,8 @@ template<typename EfieldT>
 class accel_eval
 {
 public: // Types & constants
+    typedef EfieldT efield_type;
+
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(typename EfieldT::pseudo_particle_type);
 
     enum constants { multipole_order = pseudo_particle_type::multipole_order };
@@ -47,9 +49,8 @@ public: // Types & constants
 public: // Constructors
     accel_eval() {}
 
-    accel_eval(int N, const simulation_options& so)
-        : idx_(counting_iterator<int>(0), counting_iterator<int>(N))
-        , so_(so)
+    accel_eval(const simulation_options& so)
+        : so_(so)
     {}
 
     template<typename RandomInputRangeT, typename RandomOutputRangeT>
@@ -74,18 +75,25 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
                                      const RandomInputRangeT& in,
                                      RandomOutputRangeT& out)
 {
+    const int N = in.size();
+
+    // Ensure we have a valid list of indexes
+    if (idx_.empty())
+        idx_.assign(counting_iterator<int>(0), counting_iterator<int>(N));
+
     // Build the tree to yield a pseudo particle
     const pseudo_particle_type pp = make_pseudo_particle<multipole_order>
                                         (in.begin(), idx_.begin(), idx_.end());
-
-    const int N = in.size();
 
     // Iterate over each particle in the tree and compute the acceleration
     for (int i = 0; i < N; ++i)
     {
         const particle_type& p = in[i];
+        const efield_type ef(p.r(), so_);
 
-        out[i] = p.qtom()*pp.visit_children(EfieldT(p.r(), so_));
+        out[i] = p.qtom()*pp.visit_children(ef);
+
+        //std::cout << out[i].transpose() << std::endl;
     }
 }
 

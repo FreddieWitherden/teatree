@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(pseudo2d)
     int nfail_md = 0, nfail_dq = 0, nfail_mq = 0;
 
     options_type opt; opt.epsilon(EPSILON).theta(0.6);
-    accel_eval<ef_q_type> ae(N, opt);
+    accel_eval<ef_q_type> ae(opt);
 
     BOOST_FOREACH(const particle_type& tp, p)
     {
@@ -158,5 +158,4 @@ BOOST_AUTO_TEST_CASE(pseudo2d)
     BOOST_CHECK_LT(nfail_md, N/10);
     BOOST_CHECK_LT(nfail_dq, N/10);
     BOOST_CHECK_LT(nfail_mq, N/10);
-    std::cout << nfail_dq << std::endl;
 }

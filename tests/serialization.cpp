@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(accel_eval_t)
     int N = 320;
     simulation_options so; so.theta(0.25).epsilon(1.0e-5);
 
-    accel_eval<ef_type> ae(N, so);
+    accel_eval<ef_type> ae(so);
     serialize_test(ae);
 }
 
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
     simulation_options so; so.theta(0.3).epsilon(1.0e-4);
 
     // Create the particle pusher
-    pusher_type pusher(p, accel_eval_type(N, so), 0.0, 1.0e-5);
+    pusher_type pusher(p, accel_eval_type(so), 0.0, 1.0e-5);
 
     // Advance it a few times
     for (int i = 0; i < 20; ++i) pusher.advance();
@@ -174,6 +174,8 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
 
     // Advance both objects a few more times
     for (int i = 0; i < 20; ++i) pusher.advance(), pusher_mid.advance();
+
+    pusher.output(std::ostream_iterator<particle_type>(std::cout,"\n"));
 
     // Check that both give the same result
     serialize_cmp(pusher, pusher_mid);
