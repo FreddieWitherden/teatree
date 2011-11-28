@@ -32,22 +32,18 @@ namespace teatree
  */
 class simulation_options
 {
+public: // Constructors
+    simulation_options() : epsilon_(1.0e-6), dt_(1.0e-4), theta_(0.3) {}
+
 public: // Accessors
     double epsilon() const { return epsilon_; }
+    double dt()      const { return dt_;    }
     double theta()   const { return theta_; }
 
 public: // Settors
-    simulation_options& epsilon(double s)
-    {
-        if (s <= 0) throw std::invalid_argument("Bad epsilon");
-        epsilon_ = s; return *this;
-    }
-
-    simulation_options& theta(double s)
-    {
-        if (s < 0.0 || s >= 1.0) throw std::invalid_argument("Bad theta");
-        theta_ = s; return *this;
-    }
+    simulation_options& epsilon(double s);
+    simulation_options& dt(double s);
+    simulation_options& theta(double s);
 
 private: // Serialization
     friend class boost::serialization::access;
@@ -56,15 +52,33 @@ private: // Serialization
     void serialize(ArchiveT& ar, unsigned /*file version*/)
     {
         ar & epsilon_;
+        ar & dt_;
         ar & theta_;
     }
 
 private: // Members
     double epsilon_;
+    double dt_;
     double theta_;
 };
 
+simulation_options& simulation_options::epsilon(double s)
+{
+    if (s <= 0) throw std::invalid_argument("bad epsilon");
+    epsilon_ = s; return *this;
+}
 
+simulation_options& simulation_options::dt(double s)
+{
+    if (s <= 0) throw std::invalid_argument("bad dt");
+    dt_ = s; return *this;
+}
+
+simulation_options& simulation_options::theta(double s)
+{
+    if (s < 0.0 || s >= 1.0) throw std::invalid_argument("bad theta");
+    theta_ = s; return *this;
+}
 
 }
 
