@@ -21,6 +21,7 @@
 #define TEATREE_PUSHER_VERLET_HPP
 
 #include "pusher/base.hpp"
+#include "utils/name_traits.hpp"
 
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -123,6 +124,14 @@ void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
     tmp_.reserve(this->nparticles_);
     this->output(std::back_inserter(tmp_));
 }
+
+// Traits
+template<typename A>
+struct name_traits<pusher_verlet<A> >
+{
+    static std::string abbr() { return "V"; }
+    static std::string name() { return "Verlet (Order = 2; Avg. evals = 2)"; }
+};
 
 }
 

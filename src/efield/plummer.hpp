@@ -21,6 +21,7 @@
 #define TEATREE_EFIELD_PLUMMER_HPP
 
 #include "efield/base.hpp"
+#include "utils/name_traits.hpp"
 #include "simulation/options.hpp"
 
 #include <boost/static_assert.hpp>
@@ -87,6 +88,13 @@ private: // Assertions
 
 private: // Members
     const scalar_type epsilon2_;
+};
+
+template<typename P, template<typename, typename, typename> class M, int Mul>
+struct name_traits<efield_plummer<P,M,Mul> >
+{
+    static std::string abbr() { return "P"; }
+    static std::string name() { return "Plummer"; }
 };
 
 }

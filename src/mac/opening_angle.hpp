@@ -23,6 +23,7 @@
 #include "mac/base.hpp"
 #include "particle/typedefs.hpp"
 #include "simulation/options.hpp"
+#include "utils/name_traits.hpp"
 
 #include <string>
 
@@ -55,6 +56,14 @@ public:
 
 private:
     const scalar_type theta2_;
+};
+
+// Traits
+template<typename D, typename P, typename R>
+struct name_traits<mac_opening_angle<D,P,R> >
+{
+    static std::string abbr() { return "O"; }
+    static std::string name() { return "Barnes-Hut opening angle"; }
 };
 
 }
