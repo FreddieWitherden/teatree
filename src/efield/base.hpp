@@ -39,15 +39,22 @@ template< typename DerivedT
 struct efield_base
     : public MacT<DerivedT, PParticleT, typename PParticleT::vector_type>
 {
-    BOOST_STATIC_ASSERT(MulP <= PParticleT::multipole_order);
+public: // Types
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    typedef MacT<DerivedT,PParticleT,vector_type> base_type;
+    // Make the type of MAC used available to aid with introspection
+    typedef MacT<DerivedT,PParticleT,vector_type> mac_type;
 
+private: // Compile time assertions
+    // Ensure the pseudo-particle provides the multipole moments we require
+    BOOST_STATIC_ASSERT(MulP <= PParticleT::multipole_order);
+
+public: // Constructors
     efield_base(const vector_type& r, const simulation_options& so)
-        : base_type(r, so)
+        : mac_type(r, so)
     {}
 
+public: // Visitation
     vector_type visit(const PParticleT& pp) const
     {
         const vector_type R = this->r_ - pp.r();
