@@ -23,7 +23,7 @@
 #include <boost/assert.hpp>
 #include <boost/format.hpp>
 #include <boost/chrono.hpp>
-#include <boost/cstdint.hpp>
+#include <boost/serialization/access.hpp>
 #include <boost/utility.hpp>
 
 #include <iostream>
@@ -37,31 +37,35 @@ using namespace boost::chrono;
 /**
  * Tracks the progress of a simulation.
  */
-template<typename ChronoClockT = high_resolution_clock>
+template<typename ChronoClockT = steady_clock>
 class simulation_progress : private boost::noncopyable
 {
-private: // Types
+private: // Types & constants
     typedef typename ChronoClockT::time_point time_point;
 
 public: // Constructors
-    simulation_progress(uint64_t total_iter,
-                        uint64_t start_iter = 0,
+    simulation_progress(std::ostream& os = std::cerr,
+                        int max_refresh_hz = 10);
+
+    simulation_progress(int total_iter,
+                        int start_iter,
                         std::ostream& os = std::cerr,
                         int max_refresh_hz = 10);
 
     ~simulation_progress() { if (os_.good()) os_ << std::endl; }
 
 public: // Operators
-    uint64_t operator+=(uint64_t incr);
-    uint64_t operator++() { return operator+=(1); }
+    int operator+=(int incr);
+    int operator++() { return operator+=(1); }
 
-    uint64_t completed()  { return curr_iter_; }
-    uint64_t remaining()  { return total_iter_ - curr_iter_; }
+    int completed() const { return curr_iter_; }
+    int remaining() const { return total_iter_ - curr_iter_; }
+    int total()     const { return total_iter_; }
 
-    duration<double> time_elapsed()
+    duration<double> time_elapsed() const
     { return ChronoClockT::now() - start_; }
 
-    duration<double> time_remaining()
+    duration<double> time_remaining() const
     { return static_cast<double>(remaining())/elapsed_iter_ * time_elapsed(); }
 
 
@@ -71,18 +75,24 @@ private: // Private methods
     template<typename DurationT>
     void display_hms(boost::format& fmt, const DurationT& d);
 
+private: // Serialization
+    friend class boost::serialization::access;
+
+    template<typename ArchiveT>
+    void serialize(ArchiveT& ar, unsigned /*file version*/);
+
 private: // Members
     /// When we started the simulation
     const time_point start_;
 
     /// The number of completed iterations
-    uint64_t curr_iter_;
+    int curr_iter_;
 
     /// The number of iterations completed since start_
-    uint64_t elapsed_iter_;
+    int elapsed_iter_;
 
     /// The expected (total) number of iterations
-    const uint64_t total_iter_;
+    const int total_iter_;
 
     /// Output format string
     boost::format disp_fmt_;
@@ -104,8 +114,25 @@ private: // Members
 };
 
 template<typename ChronoClockT>
-simulation_progress<ChronoClockT>::simulation_progress(uint64_t total_iter,
-                                                       uint64_t start_iter,
+simulation_progress<ChronoClockT>::simulation_progress(std::ostream& os,
+                                                       int max_refresh_hz)
+   : start_(ChronoClockT::now())
+   , curr_iter_(0)
+   , elapsed_iter_(0)
+   , total_iter_(100)
+   , disp_fmt_("%|6.1f|%% [%s%s>%s] %d/%d "
+               "ela: %02d:%02d:%02d rem: %02d:%02d:%02d")
+   , os_(os)
+   , nprogbarcol_(30)
+   , ncol_(80)
+   , min_refresh_duration_(1.0/max_refresh_hz)
+{
+    BOOST_ASSERT(max_refresh_hz > 0);
+}
+
+template<typename ChronoClockT>
+simulation_progress<ChronoClockT>::simulation_progress(int total_iter,
+                                                       int start_iter,
                                                        std::ostream& os,
                                                        int max_refresh_hz)
     : start_(ChronoClockT::now())
@@ -120,12 +147,10 @@ simulation_progress<ChronoClockT>::simulation_progress(uint64_t total_iter,
     , min_refresh_duration_(1.0/max_refresh_hz)
 {
     BOOST_ASSERT(max_refresh_hz > 0);
-
-    display();
 }
 
 template<typename ChronoClockT>
-uint64_t simulation_progress<ChronoClockT>::operator+=(uint64_t incr)
+int simulation_progress<ChronoClockT>::operator+=(int incr)
 {
     // Ensure the count is in range
     BOOST_ASSERT(curr_iter_ + incr <= total_iter_);
@@ -178,7 +203,7 @@ void simulation_progress<ChronoClockT>::display()
         disp_fmt_ % "--" % "--" % "--";
 
     // Clear the terminal if we have already printed something
-    if (last_display_time_ > high_resolution_clock::time_point())
+    if (last_display_time_ > time_point())
         os_ << '\r';
 
     // Output the progress to the terminal
@@ -204,6 +229,14 @@ void simulation_progress<ChronoClockT>::display_hms(boost::format& fmt,
     const seconds s = duration_cast<seconds>(d - h - m);
 
     fmt % h.count() % m.count() % s.count();
+}
+
+template<typename ChronoClockT>
+template<typename ArchiveT>
+void simulation_progress<ChronoClockT>::serialize(ArchiveT& ar, unsigned)
+{
+    ar & curr_iter_;
+    ar & const_cast<int&>(total_iter_);
 }
 
 }
