@@ -74,12 +74,12 @@ public: // Constructors
     pusher_base(const ForwardRangeT& in,
                 const accel_eval_type& acceleval,
                 scalar_type t0, scalar_type dt)
-        : nparticles_(in.size())
+        : pcurr_(in.begin(), in.end())
+        , ptemp_(pcurr_)
+        , nparticles_(pcurr_.size())
         , acceleval_(new accel_eval_type(acceleval))
         , nacceleval_(0), nsteps_(0)
         , t_(t0), dt_(dt)
-        , pcurr_(in.begin(), in.end())
-        , ptemp_(in.begin(), in.end())
     {}
 
     virtual ~pusher_base() {}
@@ -115,17 +115,17 @@ public: // Simulation control
      *
      */
     template<typename OutputItT>
-    void output(OutputItT out)
+    void output(OutputItT out) const
     { rng::copy(pcurr_, out); }
 
-protected: // Virtuals
-
+private: // Pure virtuals
     /**
      *
      */
     virtual void take_step(const random_access_range& in,
                            random_access_range& out) = 0;
 
+protected: // Internal hierarchy methods
     template<typename RandomInputRangeT, typename RandomOutputRangeT>
     void accel_eval(scalar_type t,
                     const RandomInputRangeT& in,
@@ -143,7 +143,11 @@ private: // Serialization
     template<typename ArchiveT>
     void load(ArchiveT& ar, unsigned /*file version*/);
 
-protected: // Protected members
+private: // Private member variables
+    std::vector<particle_type> pcurr_;
+    std::vector<particle_type> ptemp_;
+
+protected: // Protected members; TODO: remove these
     /// The number of particles (equations) being pushed.
     int nparticles_;
 
@@ -160,10 +164,6 @@ protected: // Protected members
 
     /// The simulation time step.
     scalar_type dt_;
-
-private: // Private member variables
-    std::vector<particle_type> pcurr_;
-    std::vector<particle_type> ptemp_;
 };
 
 template<typename AccelEvalT>

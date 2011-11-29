@@ -47,10 +47,12 @@ public:
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
         , accel_(this->nparticles_)
-        , tmp_(in.begin(), in.end())
-    {}
+    {
+        tmp_.reserve(this->nparticles_);
+        this->output(std::back_inserter(tmp_));
+    }
 
-public:
+private: // Concrete implementations of pure virtuals from pusher_base
     void take_step(const random_access_range& in,
                    random_access_range& out);
 
@@ -65,7 +67,7 @@ private: // Serialization
     template<typename ArchiveT>
     void load(ArchiveT& ar, unsigned /*file version*/);
 
-private:
+private: // Members
     std::vector<vector_type> accel_;
     std::vector<particle_type> tmp_;
 };
@@ -119,7 +121,7 @@ void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
      * Hence we initialise tmp_ with the current particle vector.
      */
     tmp_.reserve(this->nparticles_);
-    output(std::back_inserter(tmp_));
+    this->output(std::back_inserter(tmp_));
 }
 
 }
