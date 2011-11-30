@@ -21,8 +21,11 @@
 #define TEATREE_SIMULATION_OPTIONS_HPP
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/set.hpp>
 
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace teatree
 {
@@ -33,33 +36,52 @@ namespace teatree
 class simulation_options
 {
 public: // Constructors
-    simulation_options() : epsilon_(1.0e-6), dt_(1.0e-4), theta_(0.3) {}
+    simulation_options()
+        : epsilon_(1.0e-6)
+        , dt_(1.0e-4)
+        , theta_(0.3)
+        , output_header_(true)
+    {
+        //
+    }
 
 public: // Accessors
-    double epsilon() const { return epsilon_; }
-    double dt()      const { return dt_;    }
-    double theta()   const { return theta_; }
+    double epsilon()     const { return epsilon_; }
+    double dt()          const { return dt_;    }
+    double theta()       const { return theta_; }
+    double nd()          const { return nd_; }
+    bool output_header() const { return output_header_; }
+
+    int    nsteps()  const
+    { return output_steps_.empty() ? 0 : *output_steps_.rbegin(); }
+
+    const std::string& output_basename() const { return output_basename_; }
+
+    bool output_step(int s) const { return output_steps_.count(s); }
 
 public: // Settors
     simulation_options& epsilon(double s);
     simulation_options& dt(double s);
     simulation_options& theta(double s);
+    simulation_options& nd(double s);
+    simulation_options& output_header(bool s);
+    simulation_options& output_steps(const std::set<int>& s);
+    simulation_options& output_basename(const std::string& s);
 
 private: // Serialization
     friend class boost::serialization::access;
 
     template<typename ArchiveT>
-    void serialize(ArchiveT& ar, unsigned /*file version*/)
-    {
-        ar & epsilon_;
-        ar & dt_;
-        ar & theta_;
-    }
+    void serialize(ArchiveT& ar, unsigned /*file version*/);
 
 private: // Members
     double epsilon_;
     double dt_;
     double theta_;
+    double nd_;
+    bool   output_header_;
+    std::string output_basename_;
+    std::set<int> output_steps_;
 };
 
 simulation_options& simulation_options::epsilon(double s)
@@ -78,6 +100,47 @@ simulation_options& simulation_options::theta(double s)
 {
     if (s < 0.0 || s >= 1.0) throw std::invalid_argument("bad theta");
     theta_ = s; return *this;
+}
+
+simulation_options& simulation_options::nd(double s)
+{
+    if (s <= 0.0) throw std::invalid_argument("bad nd");
+    nd_ = s; return *this;
+}
+
+simulation_options& simulation_options::output_header(bool s)
+{
+    output_header_ = s; return *this;
+}
+
+simulation_options& simulation_options::output_steps(const std::set<int>& s)
+{
+    std::set<int> ns(s);
+    output_steps_.swap(ns);
+
+    if (output_steps_.empty())
+        throw std::invalid_argument("no output steps provided");
+    if (*output_steps_.begin() <= 0)
+        throw std::invalid_argument("bad output step provided");
+    return *this;
+}
+
+simulation_options& simulation_options::output_basename(const std::string& s)
+{
+    if (s.length() == 0) throw std::invalid_argument("bad output base name");
+    output_basename_ = s; return *this;
+}
+
+template<typename ArchiveT>
+void simulation_options::serialize(ArchiveT& ar, unsigned)
+{
+    ar & epsilon_;
+    ar & dt_;
+    ar & theta_;
+    ar & nd_;
+    ar & output_header_;
+    ar & output_steps_;
+    ar & output_basename_;
 }
 
 }
