@@ -48,10 +48,7 @@ public:
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
         , accel_(this->nparticles_)
-    {
-        tmp_.reserve(this->nparticles_);
-        this->output(std::back_inserter(tmp_));
-    }
+    {}
 
 private: // Concrete implementations of pure virtuals from pusher_base
     void take_step(const random_access_range& in,
@@ -70,7 +67,6 @@ private: // Serialization
 
 private: // Members
     std::vector<vector_type> accel_;
-    std::vector<particle_type> tmp_;
 };
 
 
@@ -79,24 +75,28 @@ void pusher_verlet<AccelEvalT>::take_step
     (const random_access_range& in,
      random_access_range& out)
 {
+    // Get the number of particles
+    const int N = this->nparticles_;
+
     // Evaluate the acceleration at time t
     accel_eval(t_, in, accel_);
 
     // Update the positions and velocities
-    for (int i = 0; i < this->nparticles_; ++i)
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < N; ++i)
     {
-        tmp_[i].v() = in[i].v() + dt_/2*accel_[i];
-        tmp_[i].r() = in[i].r() + dt_*tmp_[i].v();
+        out[i].v() = in[i].v() + dt_/2*accel_[i];
+        out[i].r() = in[i].r() + dt_*out[i].v();
     }
 
     // Do a second evaluation to get it at t+dt
-    accel_eval(t_+dt_, tmp_, accel_);
+    accel_eval(t_+dt_, out, accel_);
 
     // Do the final update
-    for (int i = 0; i < this->nparticles_; ++i)
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < N; ++i)
     {
-        out[i].r() = tmp_[i].r();
-        out[i].v() = tmp_[i].v() + dt_/2*accel_[i];
+        out[i].v() += dt_/2*accel_[i];
     }
 }
 
@@ -115,14 +115,6 @@ void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
 
     // Resize the acceleration vector to hold the right number of particles
     accel_.resize(this->nparticles_);
-
-    /*
-     * Although tmp_ is only a temporary particle vector it is required
-     * that q() and qtom() be valid as these are not set by take_step.
-     * Hence we initialise tmp_ with the current particle vector.
-     */
-    tmp_.reserve(this->nparticles_);
-    this->output(std::back_inserter(tmp_));
 }
 
 // Traits
