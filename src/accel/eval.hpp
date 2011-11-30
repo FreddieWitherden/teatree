@@ -44,7 +44,10 @@ public: // Types & constants
 
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(typename EfieldT::pseudo_particle_type);
 
-    enum constants { multipole_order = pseudo_particle_type::multipole_order };
+    enum constants {
+        dimension       = pseudo_particle_type::dimension,
+        multipole_order = pseudo_particle_type::multipole_order
+    };
 
 public: // Constructors
     accel_eval() {}
@@ -76,6 +79,7 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
                                      RandomOutputRangeT& out)
 {
     const int N = in.size();
+    const scalar_type inv_dimnd = 1.0/(dimension*so_.nd());
 
     // Ensure we have a valid list of indexes
     if (idx_.empty())
@@ -91,9 +95,7 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
         const particle_type& p = in[i];
         const efield_type ef(p.r(), so_);
 
-        out[i] = p.qtom()*pp.visit_children(ef);
-
-        //std::cout << out[i].transpose() << std::endl;
+        out[i] = inv_dimnd*p.qtom()*pp.visit_children(ef);
     }
 }
 
