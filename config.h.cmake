@@ -5,6 +5,15 @@
 # error "config.h must be included before Eigen"
 #endif
 
+/*
+ * Strong inline directive
+ */
+#if defined(__GNUC__)
+# define TEATREE_STRONG_INLINE __attribute__((always_inline))
+#else
+# define TEATREE_STRONG_INLINE 
+#endif
+
 #define EIGEN_ARRAYBASE_PLUGIN  "utils/eigen_addons.hpp"
 #define EIGEN_MATRIXBASE_PLUGIN "utils/eigen_addons.hpp"
 

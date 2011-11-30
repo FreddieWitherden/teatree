@@ -20,6 +20,8 @@
 #ifndef TEATREE_EFIELD_MOMENTS_MOMENTS_2D_HPP
 #define TEATREE_EFIELD_MOMENTS_MOMENTS_2D_HPP
 
+#include "config.h"
+
 #include "particle/typedefs.hpp"
 
 namespace teatree
@@ -35,8 +37,9 @@ struct efield_moments<PParticleT,0,2>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static vector_type exec(const particle_moments_type& m,
-                            const vector_type& R, scalar_type invR2)
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const particle_moments_type& m,
+                     const vector_type& R, scalar_type invR2)
     {
         return m.M*R*invR2;
     }
@@ -50,8 +53,9 @@ struct efield_moments<PParticleT,1,2>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static vector_type exec(const particle_moments_type& m,
-                            const vector_type& R, scalar_type invR2)
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const particle_moments_type& m,
+                     const vector_type& R, scalar_type invR2)
     {
         const scalar_type invR4 = invR2*invR2;
 
@@ -70,8 +74,9 @@ struct efield_moments<PParticleT,2,2>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static vector_type exec(const particle_moments_type& m,
-                            const vector_type& R, scalar_type invR2)
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const particle_moments_type& m,
+                     const vector_type& R, scalar_type invR2)
     {
         const scalar_type invR6 = invR2*invR2*invR2;
 

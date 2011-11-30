@@ -20,6 +20,8 @@
 #ifndef TEATREE_EFIELD_MOMENTS_RECURSE_HPP
 #define TEATREE_EFIELD_MOMENTS_RECURSE_HPP
 
+#include "config.h"
+
 #include "efield/moments/moments_2d.hpp"
 #include "efield/moments/moments_3d.hpp"
 #include "particle/typedefs.hpp"
@@ -48,9 +50,10 @@ struct efield_moments_recurse
                                   , MulP - 1
                                   > efield_moments_recurse_type;
 
-    static vector_type exec(const pseudo_particle_type& pp,
-                            const vector_type& R,
-                            scalar_type invRn)
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const pseudo_particle_type& pp,
+                     const vector_type& R,
+                     scalar_type invRn)
     {
         return efield_moments_type::exec(pp.moments(), R, invRn)
              + efield_moments_recurse_type::exec(pp, R, invRn);
@@ -68,9 +71,10 @@ struct efield_moments_recurse<PParticleT,0>
                           , pseudo_particle_type::dimension
                           > efield_moments_type;
 
-    static vector_type exec(const pseudo_particle_type& pp,
-                            const vector_type& R,
-                            scalar_type invRn)
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const pseudo_particle_type& pp,
+                     const vector_type& R,
+                     scalar_type invRn)
     {
         return efield_moments_type::exec(pp.moments(), R, invRn);
     }

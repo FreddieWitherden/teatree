@@ -20,6 +20,8 @@
 #ifndef TEATREE_PARTICLE_MOMENTS_SHIFT_RECURSE_HPP
 #define TEATREE_PARTICLE_MOMENTS_SHIFT_RECURSE_HPP
 
+#include "config.h"
+
 #include "particle/moments/shift.hpp"
 
 namespace teatree
@@ -30,7 +32,7 @@ struct moments_shift_recurse
 {
     typedef particle_moments<ScalarT,Dim,MultP> moments_type;
 
-    template<typename ArrayT>
+    template<typename ArrayT> TEATREE_STRONG_INLINE
     static void exec(moments_type& m, const moments_type& d, const ArrayT& r)
     {
         // Shift the MultP moment
@@ -46,7 +48,7 @@ struct moments_shift_recurse<ScalarT,Dim,0>
 {
     typedef particle_moments<ScalarT,Dim,0> moments_type;
 
-    template<typename ArrayT>
+    template<typename ArrayT> TEATREE_STRONG_INLINE
     static void exec(moments_type&, const moments_type&, const ArrayT&)
     {
         // No-op as the monopole moment does not require shifting

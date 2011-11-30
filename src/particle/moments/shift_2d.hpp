@@ -20,6 +20,8 @@
 #ifndef TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP
 #define TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP
 
+#include "config.h"
+
 namespace teatree
 {
 
@@ -31,7 +33,7 @@ struct moments_shift<ScalarT,2,1>
 {
     typedef particle_moments<ScalarT,2,1> moments_type;
 
-    template<typename ArrayT>
+    template<typename ArrayT> TEATREE_STRONG_INLINE
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
         const ArrayT pD = ArrayT(d.Dx,d.Dy) - r*d.M;
@@ -47,7 +49,7 @@ struct moments_shift<ScalarT,2,2>
 {
     typedef particle_moments<ScalarT,2,2> moments_type;
 
-    template<typename ArrayT>
+    template<typename ArrayT> TEATREE_STRONG_INLINE
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
         // Diagonal; compute Qxx and Qyy together
