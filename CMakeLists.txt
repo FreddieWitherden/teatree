@@ -102,17 +102,19 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 # Source files
 ##################################################
 SET(TEATREE_HEADERS
-    src/mac/base.hpp
-    src/mac/opening_angle.hpp
+    src/accel/eval.hpp
     src/efield/moments/moments_2d.hpp
     src/efield/moments/moments_3d.hpp
     src/efield/moments/recurse.hpp
     src/efield/base.hpp
-    src/efield/plummer.hpp
+    src/efield/plummer.hpp    
+    src/mac/base.hpp
+    src/mac/opening_angle.hpp
     src/particle/moments/shift_2d.hpp
     src/particle/moments/shift_3d.hpp
     src/particle/moments/shift_recurse.hpp
     src/particle/moments/shift.hpp
+    src/particle/moments/traits.hpp
     src/particle/moments/visitor.hpp
     src/particle/moments.hpp
     src/particle/particle.hpp
@@ -123,13 +125,16 @@ SET(TEATREE_HEADERS
     src/pusher/base.hpp
     src/pusher/verlet.hpp
     src/simulation/options.hpp
+    src/simulation/progress.hpp
     src/tree/branch.hpp
     src/tree/visitor.hpp
     src/utils/aligned_pool_allocator.hpp
     src/utils/eigen_addons.hpp
     src/utils/ipow.hpp
+    src/utils/name_traits.hpp
     src/utils/openmp.hpp
-    src/utils/pool_object.hpp)
+    src/utils/pool_object.hpp
+    src/utils/vector_traits.hpp)
 
 ##################################################
 # Executable
