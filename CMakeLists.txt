@@ -89,6 +89,9 @@ ENDIF()
 INCLUDE(Today)
 TODAY(TEATREE_BUILD_DATE)
 
+INCLUDE(GetGitRevisionDescription)
+GET_GIT_HEAD_REVISION(GIT_REFSPEC TEATREE_GIT_SHA1)
+
 ##################################################
 # Config.h
 ##################################################
