@@ -158,10 +158,10 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
     }
 
     // Pick some reasonable simulation options
-    simulation_options so; so.theta(0.3).epsilon(1.0e-4);
+    simulation_options so; so.theta(0.3).epsilon(1.0e-4).nd(20);
 
     // Create the particle pusher
-    pusher_type pusher(p, accel_eval_type(so), 0.0, 1.0e-5);
+    pusher_type pusher(p, accel_eval_type(so), 0.0, so.dt());
 
     // Advance it a few times
     for (int i = 0; i < 20; ++i) pusher.advance();

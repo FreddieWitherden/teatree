@@ -40,6 +40,7 @@ public: // Constructors
         : epsilon_(1.0e-6)
         , dt_(1.0e-4)
         , theta_(0.3)
+        , nd_(1000)
         , output_header_(true)
     {
         //
