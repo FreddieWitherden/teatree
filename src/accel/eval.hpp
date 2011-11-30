@@ -90,6 +90,7 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
                                         (in.begin(), idx_.begin(), idx_.end());
 
     // Iterate over each particle in the tree and compute the acceleration
+    #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < N; ++i)
     {
         const particle_type& p = in[i];
