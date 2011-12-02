@@ -53,6 +53,7 @@ IF(NOT CMAKE_BUILD_TYPE MATCHES Debug)
   INCLUDE(OptimizeForArchitecture)
   OptimizeForArchitecture()
   ADD_DEFINITIONS("-O3 -ffast-math")
+  ADD_DEFINITIONS("-DEIGEN_NO_DEBUG")
 # For debug builds enable checked iterators
 ELSE()
   ADD_DEFINITIONS("-D_GLIBCXX_DEBUG")
