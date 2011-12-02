@@ -25,6 +25,8 @@
 namespace teatree
 {
 
+template<typename ScalarT, int Dim, int MultP> struct moments_shift;
+
 /**
  * Shifts the dipole moment in 3D.
  */

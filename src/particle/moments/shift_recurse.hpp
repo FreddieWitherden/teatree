@@ -22,7 +22,8 @@
 
 #include "config.h"
 
-#include "particle/moments/shift.hpp"
+#include "particle/moments/shift_2d.hpp"
+#include "particle/moments/shift_3d.hpp"
 
 namespace teatree
 {

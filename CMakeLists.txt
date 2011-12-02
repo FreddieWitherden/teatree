@@ -113,7 +113,6 @@ SET(TEATREE_HEADERS
     src/particle/moments/shift_2d.hpp
     src/particle/moments/shift_3d.hpp
     src/particle/moments/shift_recurse.hpp
-    src/particle/moments/shift.hpp
     src/particle/moments/traits.hpp
     src/particle/moments/visitor.hpp
     src/particle/moments.hpp
