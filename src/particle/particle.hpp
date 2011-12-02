@@ -24,6 +24,7 @@
 #include <cmath>
 #include <iosfwd>
 #include <iomanip>
+#include <stdexcept>
 #include <string>
 
 #include <boost/serialization/access.hpp>
@@ -102,7 +103,11 @@ particle<VectorT>::particle(const vector_type& r,
                             const scalar_type& q,
                             const scalar_type& m)
     : r_(r), v_(v), q_(q), qtom_(q/m)
-{}
+{
+    // Parameter checking
+    if (m <= 0.0) throw std::domain_error("bad particle mass");
+    if (q == 0.0) throw std::domain_error("bad particle charge");
+}
 
 template<typename VectorT>
 template<typename ArchiveT>
