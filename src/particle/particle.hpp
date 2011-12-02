@@ -130,10 +130,12 @@ std::string particle_format_header()
     std::ostringstream ss;
 
     for (int i = 0; i < ParticleT::dimension; ++i)
-        ss << "   r" << std::setw(10) << std::left << colh[i];
+        ss << std::string((i == 0) ? 1 : 3, ' ') << 'r'
+           << std::setw(10) << std::left << colh[i];
     for (int i = 0; i < ParticleT::dimension; ++i)
-        ss << "   v" << std::setw(10) << std::left << colh[i];
-    ss << std::setw(10) << "   q" << std::setw(7) << 'm';
+        ss << std::string(3, ' ') << 'v'
+           << std::setw(10) << std::left << colh[i];
+    ss << std::setw(15) << "   q" << std::setw(12) << 'm';
 
     return ss.str();
 }
@@ -145,11 +147,11 @@ std::ostream& operator<<(std::ostream& os, const particle<VectorT>& p)
     ss << std::setprecision(5) << std::scientific;
 
     for (int i = 0; i < particle<VectorT>::dimension; ++i)
-        ss << std::setw(14) << p.r()[i];
+        ss << std::setw((i == 0) ? 12 : 14) << p.r()[i];
     for (int i = 0; i < particle<VectorT>::dimension; ++i)
         ss << std::setw(14) << p.v()[i];
-    ss << std::resetiosflags(std::ios::scientific) << std::setprecision(3);
-    ss << std::setw(7) << p.q() << std::setw(7) << p.m();
+    ss << std::setprecision(3);
+    ss << std::setw(12) << p.q() << std::setw(12) << p.m();
 
     return os << ss.str();
 }
