@@ -23,7 +23,6 @@
 #include <boost/assert.hpp>
 #include <boost/format.hpp>
 #include <boost/chrono.hpp>
-#include <boost/serialization/access.hpp>
 #include <boost/utility.hpp>
 
 #include <iostream>
@@ -52,8 +51,6 @@ public: // Constructors
                         std::ostream& os = std::cerr,
                         int max_refresh_hz = 10);
 
-    ~simulation_progress() { if (os_.good()) os_ << std::endl; }
-
 public: // Operators
     int operator+=(int incr);
     int operator++() { return operator+=(1); }
@@ -67,7 +64,6 @@ public: // Operators
 
     duration<double> time_remaining() const
     { return static_cast<double>(remaining())/elapsed_iter_ * time_elapsed(); }
-
 
 private: // Private methods
     void display();
@@ -114,23 +110,6 @@ private: // Members
 };
 
 template<typename ChronoClockT>
-simulation_progress<ChronoClockT>::simulation_progress(std::ostream& os,
-                                                       int max_refresh_hz)
-   : start_(ChronoClockT::now())
-   , curr_iter_(0)
-   , elapsed_iter_(0)
-   , total_iter_(100)
-   , disp_fmt_("%|6.1f|%% [%s%s>%s] %d/%d "
-               "ela: %02d:%02d:%02d rem: %02d:%02d:%02d")
-   , os_(os)
-   , nprogbarcol_(30)
-   , ncol_(80)
-   , min_refresh_duration_(1.0/max_refresh_hz)
-{
-    BOOST_ASSERT(max_refresh_hz > 0);
-}
-
-template<typename ChronoClockT>
 simulation_progress<ChronoClockT>::simulation_progress(int total_iter,
                                                        int start_iter,
                                                        std::ostream& os,
@@ -159,7 +138,6 @@ int simulation_progress<ChronoClockT>::operator+=(int incr)
     curr_iter_    += incr;
     elapsed_iter_ += incr;
 
-    // Display
     display();
 
     return curr_iter_;
@@ -229,14 +207,6 @@ void simulation_progress<ChronoClockT>::display_hms(boost::format& fmt,
     const seconds s = duration_cast<seconds>(d - h - m);
 
     fmt % h.count() % m.count() % s.count();
-}
-
-template<typename ChronoClockT>
-template<typename ArchiveT>
-void simulation_progress<ChronoClockT>::serialize(ArchiveT& ar, unsigned)
-{
-    ar & curr_iter_;
-    ar & const_cast<int&>(total_iter_);
 }
 
 }
