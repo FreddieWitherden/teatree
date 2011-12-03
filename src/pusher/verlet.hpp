@@ -24,7 +24,6 @@
 #include "utils/name_traits.hpp"
 
 #include <boost/serialization/base_object.hpp>
-#include <boost/serialization/split_member.hpp>
 
 #include <iterator>
 #include <vector>
@@ -57,13 +56,8 @@ private: // Concrete implementations of pure virtuals from pusher_base
 private: // Serialization
     friend class boost::serialization::access;
 
-    BOOST_SERIALIZATION_SPLIT_MEMBER();
-
     template<typename ArchiveT>
-    void save(ArchiveT& ar, unsigned /*file version*/) const;
-
-    template<typename ArchiveT>
-    void load(ArchiveT& ar, unsigned /*file version*/);
+    void serialize(ArchiveT& ar, unsigned /*file_version*/);
 
 private: // Members
     std::vector<vector_type> accel_;
@@ -103,19 +97,13 @@ void pusher_verlet<AccelEvalT>::take_step
 
 template<typename AccelEvalT>
 template<typename ArchiveT>
-void pusher_verlet<AccelEvalT>::save(ArchiveT& ar, unsigned) const
+void pusher_verlet<AccelEvalT>::serialize(ArchiveT& ar, unsigned)
 {
-    ar << boost::serialization::base_object<base_type>(*this);
-}
+    ar & boost::serialization::base_object<base_type>(*this);
 
-template<typename AccelEvalT>
-template<typename ArchiveT>
-void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
-{
-    ar >> boost::serialization::base_object<base_type>(*this);
-
-    // Resize the acceleration vector to hold the right number of particles
-    accel_.resize(this->num_particles());
+    // If we are unserializing then we must resize the acceleration vector
+    if (ArchiveT::is_loading::value)
+        accel_.resize(this->num_particles());
 }
 
 // Traits

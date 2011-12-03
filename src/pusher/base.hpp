@@ -26,8 +26,6 @@
 
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/serialization/access.hpp>
-#include <boost/serialization/scoped_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/swap.hpp>
 
@@ -134,13 +132,8 @@ protected: // Internal hierarchy methods
 private: // Serialization
     friend class boost::serialization::access;
 
-    BOOST_SERIALIZATION_SPLIT_MEMBER();
-
     template<typename ArchiveT>
-    void save(ArchiveT& ar, unsigned /*file version*/) const;
-
-    template<typename ArchiveT>
-    void load(ArchiveT& ar, unsigned /*file version*/);
+    void serialize(ArchiveT& ar, unsigned /*file version*/);
 
 private: // Member variables
     std::vector<particle_type> pcurr_;
@@ -177,29 +170,18 @@ void pusher_base<AccelEvalT>::advance()
 
 template<typename AccelEvalT>
 template<typename ArchiveT>
-void pusher_base<AccelEvalT>::save(ArchiveT& ar, unsigned /*file version*/) const
+void pusher_base<AccelEvalT>::serialize(ArchiveT& ar, unsigned)
 {
-    ar << acceleval_;
-    ar << num_acceleval_;
-    ar << num_steps_;
-    ar << t0_;
-    ar << dt_;
-    ar << pcurr_;
-}
+    ar & acceleval_;
+    ar & num_acceleval_;
+    ar & num_steps_;
+    ar & t0_;
+    ar & dt_;
+    ar & pcurr_;
 
-template<typename AccelEvalT>
-template<typename ArchiveT>
-void pusher_base<AccelEvalT>::load(ArchiveT& ar, unsigned /*file version*/)
-{
-    ar >> acceleval_;
-    ar >> num_acceleval_;
-    ar >> num_steps_;
-    ar >> t0_;
-    ar >> dt_;
-    ar >> pcurr_;
-
-    // We can synthesize the remaining quantities
-    ptemp_ = pcurr_;
+    // Copy pcurr_ into ptemp_ for the ->q() and ->m() members
+    if (ArchiveT::is_loading::value)
+        ptemp_ = pcurr_;
 }
 
 }
