@@ -99,7 +99,7 @@ simulation_options& simulation_options::dt(double s)
 
 simulation_options& simulation_options::theta(double s)
 {
-    if (s < 0.0 || s >= 1.0) throw std::invalid_argument("bad theta");
+    if (s < 0.0) throw std::invalid_argument("bad theta");
     theta_ = s; return *this;
 }
 
