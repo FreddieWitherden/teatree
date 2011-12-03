@@ -27,12 +27,8 @@
 #include <boost/iterator/permutation_iterator.hpp>
 #include <boost/swap.hpp>
 
-namespace teatree { namespace particle_partition_
+namespace teatree
 {
-
-using boost::array;
-using boost::permutation_iterator;
-using boost::swap;
 
 /**
  * Partitions up particles in N-dimensional real space into orthants.
@@ -45,8 +41,9 @@ public: // Class types & constants
 
     typedef EleIteratorT particle_iterator;
     typedef IdxIteratorT index_iterator;
-    typedef permutation_iterator<particle_iterator,
-                                 index_iterator> particle_p_iterator;
+    typedef boost::permutation_iterator< particle_iterator
+                                       , index_iterator
+                                       > particle_p_iterator;
 
 private:
     enum constants {
@@ -54,7 +51,7 @@ private:
         num_orthants = ipow<2,dimension>::value
     };
 
-    typedef array<particle_p_iterator,num_orthants+1> orthant_list;
+    typedef boost::array<particle_p_iterator,num_orthants+1> orthant_list;
 
 public:
     typedef typename orthant_list::iterator orthant_iterator;
@@ -150,10 +147,6 @@ particle_partition<ParticleT,EleIteratorT,IdxIteratorT>::particle_partition
     orthants_.front() = first_p;
     orthants_.back()  = last_p;
 }
-
-}
-
-using particle_partition_::particle_partition;
 
 }
 
