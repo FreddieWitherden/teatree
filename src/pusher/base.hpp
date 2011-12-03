@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <boost/range/algorithm/copy.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/scoped_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -41,17 +40,13 @@
     typedef pusher_base<AccelEvalT> base_type;                             \
     TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename base_type::particle_type); \
     typedef typename base_type::random_access_range random_access_range;   \
-    using base_type::accel_eval;                                           \
-    using base_type::acceleval_;                                           \
-    using base_type::dt_;                                                  \
-    using base_type::t_
+    using base_type::accel_eval
 
 
 namespace teatree { namespace pusher_base_
 {
 
 namespace rng = boost::range;
-using boost::scoped_ptr;
 
 /**
  * Base particle pusher class.
@@ -76,34 +71,38 @@ public: // Constructors
                 scalar_type t0, scalar_type dt)
         : pcurr_(in.begin(), in.end())
         , ptemp_(pcurr_)
-        , nparticles_(pcurr_.size())
-        , acceleval_(new accel_eval_type(acceleval))
-        , nacceleval_(0), nsteps_(0)
-        , t_(t0), dt_(dt)
+        , num_acceleval_(0), num_steps_(0)
+        , t0_(t0), dt_(dt)
+        , acceleval_(acceleval)
     {}
 
     virtual ~pusher_base() {}
 
 public: // Accessors
     /**
-     * Returns the number of acceleration evaluations thus far.
-     */
-    int nacceleval() { return nacceleval_; }
-
-    /**
      * Returns the current simulation time.
      */
-    scalar_type t() { return t_; }
+    scalar_type t() const { return t0_ + num_steps_*dt_; }
 
     /**
      * Returns the time-step being used for the simulation.
      */
-    scalar_type dt() { return dt_; }
+    scalar_type dt() const { return dt_; }
 
     /**
      * Returns the number of steps which have been taken thus far.
      */
-    int nsteps() { return nsteps_; }
+    int num_steps() const { return num_steps_; }
+
+    /**
+     * Returns the number of particles being pushed.
+     */
+    int num_particles() const { return pcurr_.size(); }
+
+    /**
+     * Returns the number of acceleration evaluations thus far.
+     */
+    int num_acceleval() const { return num_acceleval_; }
 
 public: // Simulation control
     /**
@@ -130,7 +129,7 @@ protected: // Internal hierarchy methods
     void accel_eval(scalar_type t,
                     const RandomInputRangeT& in,
                     RandomOutputRangeT& out)
-    { (*acceleval_)(t, in, out); ++nacceleval_; }
+    { acceleval_(t, in, out); ++num_acceleval_; }
 
 private: // Serialization
     friend class boost::serialization::access;
@@ -143,27 +142,24 @@ private: // Serialization
     template<typename ArchiveT>
     void load(ArchiveT& ar, unsigned /*file version*/);
 
-private: // Private member variables
+private: // Member variables
     std::vector<particle_type> pcurr_;
     std::vector<particle_type> ptemp_;
 
-protected: // Protected members; TODO: remove these
-    /// The number of particles (equations) being pushed.
-    int nparticles_;
-
-    scoped_ptr<accel_eval_type> acceleval_;
-
     /// The number of acceleration evaluations thus far.
-    int nacceleval_;
+    int num_acceleval_;
 
     /// The number of steps, each of length dt, taken thus far.
-    int nsteps_;
+    int num_steps_;
 
-    /// The current simulation time.
-    scalar_type t_;
+    /// The starting simulation time
+    scalar_type t0_;
 
     /// The simulation time step.
     scalar_type dt_;
+
+    // Acceleration evaluator
+    accel_eval_type acceleval_;
 };
 
 template<typename AccelEvalT>
@@ -172,8 +168,8 @@ void pusher_base<AccelEvalT>::advance()
     // Take a step using the solver
     take_step(pcurr_, ptemp_);
 
-    // Update the current time
-    t_ = ++nsteps_ * dt_;
+    // Update the number of steps taken
+    ++num_steps_;
 
     // Swizzle the current and temp vectors
     boost::swap(pcurr_, ptemp_);
@@ -184,8 +180,9 @@ template<typename ArchiveT>
 void pusher_base<AccelEvalT>::save(ArchiveT& ar, unsigned /*file version*/) const
 {
     ar << acceleval_;
-    ar << nacceleval_;
-    ar << nsteps_;
+    ar << num_acceleval_;
+    ar << num_steps_;
+    ar << t0_;
     ar << dt_;
     ar << pcurr_;
 }
@@ -195,15 +192,14 @@ template<typename ArchiveT>
 void pusher_base<AccelEvalT>::load(ArchiveT& ar, unsigned /*file version*/)
 {
     ar >> acceleval_;
-    ar >> nacceleval_;
-    ar >> nsteps_;
+    ar >> num_acceleval_;
+    ar >> num_steps_;
+    ar >> t0_;
     ar >> dt_;
     ar >> pcurr_;
 
     // We can synthesize the remaining quantities
-    t_ = nsteps_*dt_;
     ptemp_ = pcurr_;
-    nparticles_ = pcurr_.size();
 }
 
 }

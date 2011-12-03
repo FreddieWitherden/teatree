@@ -47,7 +47,7 @@ public:
     pusher_verlet(const ForwardRangeT& in,
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
-        , accel_(this->nparticles_)
+        , accel_(this->num_particles())
     {}
 
 private: // Concrete implementations of pure virtuals from pusher_base
@@ -76,27 +76,28 @@ void pusher_verlet<AccelEvalT>::take_step
      random_access_range& out)
 {
     // Get the number of particles
-    const int N = this->nparticles_;
+    const int N = this->num_particles();
+    const scalar_type t = this->t(), dt = this->dt();
 
     // Evaluate the acceleration at time t
-    accel_eval(t_, in, accel_);
+    accel_eval(t, in, accel_);
 
     // Update the positions and velocities
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; ++i)
     {
-        out[i].v() = in[i].v() + dt_/2*accel_[i];
-        out[i].r() = in[i].r() + dt_*out[i].v();
+        out[i].v() = in[i].v() + dt/2*accel_[i];
+        out[i].r() = in[i].r() + dt*out[i].v();
     }
 
     // Do a second evaluation to get it at t+dt
-    accel_eval(t_+dt_, out, accel_);
+    accel_eval(t+dt, out, accel_);
 
     // Do the final update
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; ++i)
     {
-        out[i].v() += dt_/2*accel_[i];
+        out[i].v() += dt/2*accel_[i];
     }
 }
 
@@ -114,7 +115,7 @@ void pusher_verlet<AccelEvalT>::load(ArchiveT& ar, unsigned)
     ar >> boost::serialization::base_object<base_type>(*this);
 
     // Resize the acceleration vector to hold the right number of particles
-    accel_.resize(this->nparticles_);
+    accel_.resize(this->num_particles());
 }
 
 // Traits
