@@ -110,6 +110,7 @@ SET(TEATREE_HEADERS
     src/efield/base.hpp
     src/efield/plummer.hpp    
     src/mac/base.hpp
+    src/mac/min_dist.hpp
     src/mac/opening_angle.hpp
     src/particle/moments/shift_2d.hpp
     src/particle/moments/shift_3d.hpp
@@ -122,6 +123,10 @@ SET(TEATREE_HEADERS
     src/particle/pseudo_particle.hpp
     src/particle/pseudo_particle_visitor.hpp
     src/particle/typedefs.hpp
+    src/pusher/comp/base.hpp
+    src/pusher/comp/21.hpp
+    src/pusher/comp/43.hpp
+    src/pusher/comp/67.hpp
     src/pusher/base.hpp
     src/pusher/verlet.hpp
     src/simulation/options.hpp
