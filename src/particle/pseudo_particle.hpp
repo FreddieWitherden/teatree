@@ -72,7 +72,8 @@ public: // Constructors
     template<typename PartFactT, typename IteratorT>
     pseudo_particle(PartFactT partition_factory,
                     IteratorT first,
-                    IteratorT last);
+                    IteratorT last,
+                    int level = 0);
 
     ~pseudo_particle() {}
 
@@ -102,8 +103,9 @@ template<typename PartFactT, typename IteratorT>
 pseudo_particle<ParticleT,MultP>::pseudo_particle(
     PartFactT partition_factory,
     IteratorT first,
-    IteratorT last)
-    : base_type(partition_factory, first, last)
+    IteratorT last,
+    int level)
+    : base_type(partition_factory, first, last, level)
 {
     // Visit our children to determine our aggregate properties
     pseudo_particle_visitor<pseudo_particle_type> pv;

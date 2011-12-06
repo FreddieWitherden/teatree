@@ -65,7 +65,8 @@ public: // Constructors
      */
     particle_partition(particle_iterator first_e,
                        particle_p_iterator first_p,
-                       particle_p_iterator last_p);
+                       particle_p_iterator last_p,
+                       int level);
 
 public: // Orthant iteration
     orthant_iterator begin() { return orthants_.begin(); }
@@ -137,7 +138,8 @@ template<typename ParticleT, typename EleIteratorT, typename IdxIteratorT>
 particle_partition<ParticleT,EleIteratorT,IdxIteratorT>::particle_partition
     (particle_iterator first_e,
      particle_p_iterator first_p,
-     particle_p_iterator last_p)
+     particle_p_iterator last_p,
+     int level)
 {
     // Perform the partitioning
     partition_recurse<>::exec(first_e, first_p.base(), last_p.base(),

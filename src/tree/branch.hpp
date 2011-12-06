@@ -54,7 +54,8 @@ public: // Constructors & destructors
     template<typename PartFactT, typename IteratorT>
     tree_branch(PartFactT partition_factory,
                 IteratorT first,
-                IteratorT last);
+                IteratorT last,
+                int level);
     virtual ~tree_branch();
 
 public: // Visitation
@@ -92,7 +93,8 @@ template<typename PartFactT, typename IteratorT>
 tree_branch<LeafT,BranchT,D>::tree_branch(
     PartFactT partition_factory,
     IteratorT first,
-    IteratorT last)
+    IteratorT last,
+    int level)
     : num_children_(0)
 {
     typedef typename boost::result_of <
@@ -100,7 +102,7 @@ tree_branch<LeafT,BranchT,D>::tree_branch(
                                       >::type partition_type;
 
     // Create a partition object to subdivide the branch
-    partition_type p(partition_factory(first, last));
+    partition_type p(partition_factory(first, last, level));
     typename partition_type::orthant_iterator it = p.begin();
 
 
@@ -118,7 +120,7 @@ tree_branch<LeafT,BranchT,D>::tree_branch(
             break;
         default:
             children_[num_children_++] = new branch_type(partition_factory,
-                                                         lower, upper);
+                                                         lower, upper, level+1);
             break;
         }
     }

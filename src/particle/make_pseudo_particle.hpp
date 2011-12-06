@@ -38,6 +38,7 @@ using boost::iterator_value;
 using boost::phoenix::construct;
 using boost::phoenix::arg_names::arg1;
 using boost::phoenix::arg_names::arg2;
+using boost::phoenix::arg_names::arg3;
 
 /**
  *
@@ -58,7 +59,7 @@ make_pseudo_particle(const EleItT begin_e, IdxItT begin_i, IdxItT end_i)
     permutation_iterator end_p   = permutation_iterator(begin_e, end_i);
 
     return pseudo_particle<particle_type,MultP>
-        (construct<partition_type>(begin_e, arg1, arg2), begin_p, end_p);
+        (construct<partition_type>(begin_e, arg1, arg2, arg3), begin_p, end_p);
 }
 
 /**
