@@ -35,10 +35,11 @@ namespace teatree
  * A second-order Störmer-Verlet integrator.
  */
 template<typename AccelEvalT>
-class pusher_verlet : public pusher_base<AccelEvalT>
+class pusher_verlet : public pusher_base<AccelEvalT,1>
 {
 public:
-    TEATREE_PUSHER_GENERATE_TYPEDEFS(AccelEvalT);
+    typedef pusher_base<AccelEvalT,1> base_type;
+    TEATREE_PUSHER_GENERATE_TYPEDEFS(base_type);
 
     pusher_verlet() {}
 
@@ -46,64 +47,42 @@ public:
     pusher_verlet(const ForwardRangeT& in,
                   AccelEvalT acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
-        , accel_(this->num_particles())
     {}
 
 private: // Concrete implementations of pure virtuals from pusher_base
-    void take_step(const random_access_range& in,
-                   random_access_range& out);
-
-private: // Serialization
-    friend class boost::serialization::access;
-
-    template<typename ArchiveT>
-    void serialize(ArchiveT& ar, unsigned /*file_version*/);
-
-private: // Members
-    std::vector<vector_type> accel_;
+    void take_step(const particle_range& in, particle_range& out);
 };
 
 
 template<typename AccelEvalT>
-void pusher_verlet<AccelEvalT>::take_step
-    (const random_access_range& in,
-     random_access_range& out)
+void pusher_verlet<AccelEvalT>::take_step(const particle_range& in,
+                                          particle_range& out)
 {
-    // Get the number of particles
+    // For convenience
     const int N = this->num_particles();
     const scalar_type t = this->t(), dt = this->dt();
+    accel_range& accel = this->get_accel_range(0);
 
-    // Evaluate the acceleration at time t
-    accel_eval(t, in, accel_);
+    // Evaluate the acceleration at time t into accel
+    this->accel_eval(t, in, accel);
 
     // Update the positions and velocities
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; ++i)
     {
-        out[i].v() = in[i].v() + dt/2*accel_[i];
+        out[i].v() = in[i].v() + dt/2*accel[i];
         out[i].r() = in[i].r() + dt*out[i].v();
     }
 
     // Do a second evaluation to get it at t+dt
-    accel_eval(t+dt, out, accel_);
+    this->accel_eval(t+dt, out, accel);
 
     // Do the final update
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; ++i)
     {
-        out[i].v() += dt/2*accel_[i];
+        out[i].v() += dt/2*accel[i];
     }
-}
-
-template<typename AccelEvalT>
-template<typename ArchiveT>
-void pusher_verlet<AccelEvalT>::serialize(ArchiveT& ar, unsigned)
-{
-    ar & boost::serialization::base_object<base_type>(*this);
-
-    // If we are unserializing then we must resize the acceleration vector
-    if (ArchiveT::is_loading::value)
-        accel_.resize(this->num_particles());
 }
 
 // Traits

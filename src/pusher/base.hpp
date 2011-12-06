@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <boost/array.hpp>
+#include <boost/foreach.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
@@ -34,12 +36,10 @@
  *  which prevents template sub-classes from being able to access the
  *  typedef's and members in a base class.
  */
-#define TEATREE_PUSHER_GENERATE_TYPEDEFS(AccelEvalT)                       \
-    typedef pusher_base<AccelEvalT> base_type;                             \
-    TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename base_type::particle_type); \
-    typedef typename base_type::random_access_range random_access_range;   \
-    using base_type::accel_eval
-
+#define TEATREE_PUSHER_GENERATE_TYPEDEFS(BaseT)                            \
+    TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename BaseT::particle_type);     \
+    typedef typename BaseT::particle_range particle_range;                 \
+    typedef typename BaseT::accel_range accel_range
 
 namespace teatree { namespace pusher_base_
 {
@@ -49,14 +49,15 @@ namespace rng = boost::range;
 /**
  * Base particle pusher class.
  */
-template<typename AccelEvalT>
+template<typename AccelEvalT, int NAccel>
 class pusher_base
 {
 public: // Types
     TEATREE_PARTICLE_GENERATE_TYPEDEFS(typename AccelEvalT::particle_type);
 
 protected:
-    typedef std::vector<particle_type> random_access_range;
+    typedef std::vector<particle_type> particle_range;
+    typedef std::vector<vector_type> accel_range;
 
     typedef AccelEvalT accel_eval_type;
 
@@ -72,7 +73,7 @@ public: // Constructors
         , num_acceleval_(0), num_steps_(0)
         , t0_(t0), dt_(dt)
         , acceleval_(acceleval)
-    {}
+    { BOOST_FOREACH(accel_range& a, atemp_) a.resize(this->num_particles()); }
 
     virtual ~pusher_base() {}
 
@@ -119,8 +120,7 @@ private: // Pure virtuals
     /**
      *
      */
-    virtual void take_step(const random_access_range& in,
-                           random_access_range& out) = 0;
+    virtual void take_step(const particle_range& in, particle_range& out) = 0;
 
 protected: // Internal hierarchy methods
     template<typename RandomInputRangeT, typename RandomOutputRangeT>
@@ -128,6 +128,8 @@ protected: // Internal hierarchy methods
                     const RandomInputRangeT& in,
                     RandomOutputRangeT& out)
     { acceleval_(t, in, out); ++num_acceleval_; }
+
+    accel_range& get_accel_range(int i) { return atemp_[i]; }
 
 private: // Serialization
     friend class boost::serialization::access;
@@ -138,6 +140,8 @@ private: // Serialization
 private: // Member variables
     std::vector<particle_type> pcurr_;
     std::vector<particle_type> ptemp_;
+
+    boost::array<accel_range,NAccel> atemp_;
 
     /// The number of acceleration evaluations thus far.
     int num_acceleval_;
@@ -155,8 +159,8 @@ private: // Member variables
     accel_eval_type acceleval_;
 };
 
-template<typename AccelEvalT>
-void pusher_base<AccelEvalT>::advance()
+template<typename AccelEvalT, int NEval>
+void pusher_base<AccelEvalT,NEval>::advance()
 {
     // Take a step using the solver
     take_step(pcurr_, ptemp_);
@@ -168,9 +172,9 @@ void pusher_base<AccelEvalT>::advance()
     boost::swap(pcurr_, ptemp_);
 }
 
-template<typename AccelEvalT>
+template<typename AccelEvalT, int NEval>
 template<typename ArchiveT>
-void pusher_base<AccelEvalT>::serialize(ArchiveT& ar, unsigned)
+void pusher_base<AccelEvalT,NEval>::serialize(ArchiveT& ar, unsigned)
 {
     ar & acceleval_;
     ar & num_acceleval_;
@@ -181,7 +185,10 @@ void pusher_base<AccelEvalT>::serialize(ArchiveT& ar, unsigned)
 
     // Copy pcurr_ into ptemp_ for the ->q() and ->m() members
     if (ArchiveT::is_loading::value)
+    {
         ptemp_ = pcurr_;
+        BOOST_FOREACH(accel_range& a, atemp_) a.resize(this->num_particles());
+    }
 }
 
 }
