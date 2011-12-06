@@ -25,7 +25,6 @@
 
 #include <boost/array.hpp>
 #include <boost/iterator/permutation_iterator.hpp>
-#include <boost/swap.hpp>
 
 namespace teatree
 {
@@ -64,6 +63,7 @@ public: // Constructors
      *  about this element.
      */
     particle_partition(particle_iterator first_e,
+                       int max_lvl,
                        particle_p_iterator first_p,
                        particle_p_iterator last_p,
                        int level);
@@ -72,21 +72,23 @@ public: // Orthant iteration
     orthant_iterator begin() { return orthants_.begin(); }
     orthant_iterator end()   { return orthants_.end(); }
 
-private: // Nested classes
+private: // Mid-point partitioning
     /**
-     * Predicate for passing to std::nth_element.
+     * Predecate for passing to std::partition
      */
     template<int L>
-    class partition_pred
+    class partition_mid_pred
     {
     public:
-        partition_pred(particle_iterator first) : first_(first) {}
+        partition_mid_pred(particle_iterator first, const vector_type& v)
+            : first_(first), v_(v)
+        {}
 
-        bool operator()(int i, int j) const
-        { return (first_+i)->r()[L] < (first_+j)->r()[L]; }
+        bool operator()(int i) const { return (first_+i)->r()[L] < v_[L]; }
 
     private:
         const particle_iterator first_;
+        const vector_type& v_;
     };
 
     /**
@@ -96,18 +98,17 @@ private: // Nested classes
      *  1-4 (3E).
      */
     template<int D = dimension, int L = 0, int R = num_orthants, int M = (L+R)/2>
-    struct partition_recurse
+    struct partition_mid_recurse
     {
         template<typename OutputIteratorT>
-        static void exec(particle_iterator first,
+        static void exec(particle_iterator first, const vector_type& v,
                          index_iterator lower, index_iterator upper,
                          OutputIteratorT result)
         {
-            partition_pred<dimension-D> pred(first);
-            index_iterator mid = lower + (upper - lower)/2;
-            std::nth_element(lower, mid, upper, pred);
-            partition_recurse<D-1,L,M>::exec(first, lower, mid, result);
-            partition_recurse<D-1,M,R>::exec(first, mid, upper, result);
+            partition_mid_pred<dimension-D> pred(first, v);
+            index_iterator mid = std::partition(lower, upper, pred);
+            partition_mid_recurse<D-1,L,M>::exec(first, v, lower, mid, result);
+            partition_mid_recurse<D-1,M,R>::exec(first, v, mid, upper, result);
             *(result+M) = particle_p_iterator(first, mid);
         }
     };
@@ -116,14 +117,68 @@ private: // Nested classes
      * Specialization for the partitioning of the final dimension.
      */
     template<int L, int R, int M>
-    struct partition_recurse<0, L, R, M>
+    struct partition_mid_recurse<0, L, R, M>
+    {
+        template<typename OutputIteratorT>
+        static void exec(particle_iterator first, const vector_type& v,
+                         index_iterator lower, index_iterator upper,
+                         OutputIteratorT result)
+        {
+            partition_mid_pred<dimension-1> pred(first, v);
+            index_iterator mid = std::partition(lower, upper, pred);
+            *(result+M) = particle_p_iterator(first, mid);
+        }
+    };
+
+private: // Median partitioning
+    /**
+     * Predicate for passing to std::nth_element.
+     */
+    template<int L>
+    class partition_median_pred
+    {
+    public:
+        partition_median_pred(particle_iterator first) : first_(first) {}
+
+        bool operator()(int i, int j) const
+        { return (first_+i)->r()[L] < (first_+j)->r()[L]; }
+
+    private:
+        const particle_iterator first_;
+    };
+
+    /**
+     * Median partitioning using std::nth_element.
+     */
+    template<int D = dimension, int L = 0, int R = num_orthants, int M = (L+R)/2>
+    struct partition_median_recurse
     {
         template<typename OutputIteratorT>
         static void exec(particle_iterator first,
                          index_iterator lower, index_iterator upper,
                          OutputIteratorT result)
         {
-            partition_pred<dimension-1> pred(first);
+            partition_median_pred<dimension-D> pred(first);
+            index_iterator mid = lower + (upper - lower)/2;
+            std::nth_element(lower, mid, upper, pred);
+            partition_median_recurse<D-1,L,M>::exec(first, lower, mid, result);
+            partition_median_recurse<D-1,M,R>::exec(first, mid, upper, result);
+            *(result+M) = particle_p_iterator(first, mid);
+        }
+    };
+
+    /**
+     * Specialization for the partitioning of the final dimension.
+     */
+    template<int L, int R, int M>
+    struct partition_median_recurse<0, L, R, M>
+    {
+        template<typename OutputIteratorT>
+        static void exec(particle_iterator first,
+                         index_iterator lower, index_iterator upper,
+                         OutputIteratorT result)
+        {
+            partition_median_pred<dimension-1> pred(first);
             index_iterator mid = lower + (upper - lower)/2;
             std::nth_element(lower, mid, upper, pred);
             *(result+M) = particle_p_iterator(first, mid);
@@ -137,13 +192,34 @@ private: // Member variables
 template<typename ParticleT, typename EleIteratorT, typename IdxIteratorT>
 particle_partition<ParticleT,EleIteratorT,IdxIteratorT>::particle_partition
     (particle_iterator first_e,
+     int max_level,
      particle_p_iterator first_p,
      particle_p_iterator last_p,
      int level)
 {
-    // Perform the partitioning
-    partition_recurse<>::exec(first_e, first_p.base(), last_p.base(),
-                              orthants_.begin());
+    /*
+     * Decide how to partition; for lower levels we partition about the
+     * min-max midpoint.  This does a good job of getting rid of
+     * outliers.  We then move onto a mean-based system
+     */
+    if (level <= max_level)
+    {
+        array_type min = first_p->r(), max = first_p->r();
+
+        // Get the min and max values
+        for (particle_p_iterator it = first_p+1; it != last_p; ++it)
+        {
+            const array_type r = it->r(); min = min.min(r); max = max.max(r);
+        }
+
+        partition_mid_recurse<>::exec(first_e, 0.5*(min + max), first_p.base(),
+                                      last_p.base(), orthants_.begin());
+    }
+    else
+    {
+        partition_median_recurse<>::exec(first_e, first_p.base(), last_p.base(),
+                                         orthants_.begin());
+    }
 
     // Explicitly set the boundary elements
     orthants_.front() = first_p;

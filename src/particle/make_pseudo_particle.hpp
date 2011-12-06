@@ -28,6 +28,7 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 
+#include <cmath>
 #include <vector>
 
 namespace teatree { namespace make_pseudo_particle_
@@ -58,8 +59,13 @@ make_pseudo_particle(const EleItT begin_e, IdxItT begin_i, IdxItT end_i)
     permutation_iterator begin_p = permutation_iterator(begin_e, begin_i);
     permutation_iterator end_p   = permutation_iterator(begin_e, end_i);
 
+    // Estimate the theoretical maximum tree depth
+    const int max_lvl = std::log(end_i - begin_i)
+                      / (particle_type::dimension * std::log(2.0));
+
     return pseudo_particle<particle_type,MultP>
-        (construct<partition_type>(begin_e, arg1, arg2, arg3), begin_p, end_p);
+        (construct<partition_type>(begin_e, max_lvl, arg1, arg2, arg3),
+         begin_p, end_p);
 }
 
 /**
