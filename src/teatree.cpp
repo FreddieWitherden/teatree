@@ -275,6 +275,9 @@ static void process_init(const std::string& input_file,
     simulation_ptr sim;
     for_sim_type(sim_type, simulation_type_constructor(sim, ifs, so));
 
+    // Output the final parameters being used by the simulation
+    std::cout << "Parameters: " << sim->parameters() << "\n";
+
     // Pick the output file name
     const std::string ofname = output_file + "-00000.tts";
 
