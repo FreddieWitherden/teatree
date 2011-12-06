@@ -25,7 +25,8 @@ INCLUDE_DIRECTORIES(src)
 SET(TEATREE_BOOST_LIBS
     chrono
     program_options
-    serialization)
+    serialization
+    system)
 
 # Find boost
 FIND_PACKAGE(Boost REQUIRED ${TEATREE_BOOST_LIBS})
