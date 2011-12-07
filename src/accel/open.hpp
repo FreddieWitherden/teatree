@@ -17,24 +17,21 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_ACCEL_EVAL_HPP
-#define TEATREE_ACCEL_EVAL_HPP
+#ifndef TEATREE_ACCEL_OPEN_HPP
+#define TEATREE_ACCEL_OPEN_HPP
 
 #include "particle/make_pseudo_particle.hpp"
-#include "particle/particle.hpp"
+#include "particle/typedefs.hpp"
 #include "simulation/options.hpp"
 
-#include <boost/assert.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 
 #include <vector>
 
-namespace teatree { namespace accel_open_
+namespace teatree
 {
-
-using boost::counting_iterator;
 
 template<typename EfieldT>
 class accel_open
@@ -78,6 +75,8 @@ void accel_open<EfieldT>::operator()(scalar_type t,
                                      const RandomInputRangeT& in,
                                      RandomOutputRangeT& out)
 {
+    using boost::counting_iterator;
+
     const int N = in.size();
     const scalar_type inv_dimnd = 1.0/(dimension*so_.nd());
 
@@ -110,8 +109,4 @@ void accel_open<EfieldT>::serialize(ArchiveT& ar, unsigned)
 
 }
 
-using accel_open_::accel_open;
-
-}
-
-#endif // TEATREE_ACCEL_EVAL_HPP
+#endif // TEATREE_ACCEL_OPEN_HPP
