@@ -25,59 +25,68 @@
 
 #include "particle/particle.hpp"
 #include "pusher/verlet.hpp"
+#include "pusher/comp/21.hpp"
+#include "pusher/comp/43.hpp"
+#include "pusher/comp/67.hpp"
+
+#include <boost/assign/list_inserter.hpp>
+
+using namespace boost::assign;
+using namespace teatree;
+
 
 #include <cmath>
 
-using namespace teatree;
 using namespace Eigen;
 
-/**
- * Computes the acceleration of a small near-massless object interacting
- *  gravitationally with two larger masses -- the restricted three body
- *  problem.  In this case the two larger masses are the Earth and the
- *  Moon and the massless object a satellite.  See Hairer et al (1991,
- *  Springer) p. 130.
- */
-struct arenstorf
+struct kepler
 {
-    typedef particle<Vector2d> particle_type;
-    typedef Vector2d vector_type;
+    typedef Vector3d vector_type;
+    typedef particle<Vector3d> particle_type;
 
     template<typename RandomInputRangeT, typename RandomOutputRangeT>
     void operator()(double, RandomInputRangeT& in, RandomOutputRangeT& out)
     {
-        const vector_type r = in[0].r(), v = in[0].v();
+        const double K = 2.95912208286e-4;
+        std::fill(out.begin(), out.end(), Vector3d::Zero());
 
-        // Reduced mass for the Earth-Moon system
-        const double mu = 0.012277471;
-        const double mu_p = 1.0 - mu;
+        for (int i = 0; i < in.size(); ++i)
+        {
+            for (int j = 0; j < in.size(); ++j)
+            {
+                if (i != j)
+                {
+                    const Vector3d D = in[j].r() - in[i].r();
+                    out[i] += in[j].m()*D/(D.norm()*D.squaredNorm());
+                }
+            }
 
-        const double D1 = pow(pow(r.x()+mu  , 2) + pow(r.y(), 2), 3.0/2.0);
-        const double D2 = pow(pow(r.x()-mu_p, 2) + pow(r.y(), 2), 3.0/2.0);
-
-        out[0].x() = r.x() + 2*v.y() - mu_p*(r.x()+mu)/D1 - mu*(r.x()-mu_p)/D2;
-        out[0].y() = r.y() - 2*v.x() - mu_p*r.y()/D1      - mu*r.y()/D2;
+            out[i] *= K;
+        }
     }
 };
 
 BOOST_AUTO_TEST_CASE(order)
 {
-    std::vector<arenstorf::particle_type> p;
-    arenstorf::particle_type newp;
+    std::vector<kepler::particle_type> planets;
+    push_back(planets)(Vector3d(-3.5023653,-3.8169847,-1.5507963),
+                       Vector3d(0.00565429,-0.0041249,-0.00190589),
+                       1, 0.000954786104043)
+                      (Vector3d(9.0755314,-3.0458353,-1.6483708),
+                       Vector3d(0.00168318,0.00483525,0.00192462),
+                       1, 0.000285583733151)
+                      (Vector3d(8.3101420,-16.2901086,-7.2521278),
+                       Vector3d(0.00354178,0.00137102,0.00055029),
+                       1, 0.0000437273164546)
+                      (Vector3d(11.4707666,-25.7294829,-10.8169456),
+                       Vector3d(0.00288930,0.00114527,0.00039677),
+                       1, 0.0000517759138449)
+                      // Pluto (so not really a planet)
+                      (Vector3d(-15.5387357,-25.2225594,-3.1902382),
+                       Vector3d(0.00276725,-0.00170702,-0.00136504),
+                       1, 1.0/1.3e8)
+                      // The Sun
+                      (Vector3d::Zero(), Vector3d::Zero(), 1, 1.00000597682);
 
-    /*
-     * Initial conditions.  These are chosen such that the resulting
-     * motion is periodic with a period of ~17.07.
-     */
-    p.push_back(arenstorf::particle_type(Vector2d(0.994,  0.0),
-                                         Vector2d(0.0  , -2.0015851063790825),
-                                         1.0, 1.0));
-
-    // Solver
-    pusher_verlet<arenstorf> verlet(p, arenstorf(), 0, 0.0001);
-    while (verlet.t() < 17.06521656015796) verlet.advance();
-    verlet.output(&newp);
-
-    BOOST_CHECK_CLOSE(newp.r().x(), p.front().r().x(), 1.0);
-    BOOST_CHECK_SMALL(newp.r().y(), 0.025);
+    // TODO
 }
