@@ -104,7 +104,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 # Source files
 ##################################################
 SET(TEATREE_HEADERS
-    src/accel/eval.hpp
+    src/accel/open.hpp
     src/efield/moments/moments_2d.hpp
     src/efield/moments/moments_3d.hpp
     src/efield/moments/recurse.hpp
