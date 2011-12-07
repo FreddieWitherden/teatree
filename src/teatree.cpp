@@ -57,7 +57,7 @@ typedef boost::shared_ptr<simulation> simulation_ptr;
 /**
  * The number of times the process has received the SIGINT signal.
  */
-static int sigint_count = 0;
+static bool sigint_caught = false;
 
 /**
  *
@@ -244,7 +244,7 @@ static bool simulation_on_iteration(const simulation&,
                                     simulation_progress<>& prog)
 {
     // If we have been asked to break then do so
-    if (sigint_count)
+    if (sigint_caught)
         return false;
     // Otherwise update the progress bar and return true
     else
@@ -295,21 +295,11 @@ static void process_init(const std::string& input_file,
  */
 static void process_run_sigint(int)
 {
-    switch (++sigint_count)
-    {
-        case 1:
-            std::cout << "\n\nFirst Ctrl+C caught; will break after this "
-                         "iteration";
-            break;
-        case 2:
-            std::cout << "\nSecond Ctrl+C caught; send again to immediately "
-                         "terminate teatree";
-            break;
-        default:
-            std::cout << "\nTerminating teatree mid iteration!\n";
-            exit(0);
-            break;
-    }
+    sigint_caught = true;
+
+    std::cout << "\nCtrl+C caught; will break after this interation"
+                 "\nSend again to IMMEDIATELY terminate tearee"
+              << std::endl;
 }
 
 /**
@@ -349,7 +339,7 @@ static void process_run(const std::string& input_file)
     struct sigaction sigint_handler;
     sigint_handler.sa_handler = &process_run_sigint;
     sigemptyset(&sigint_handler.sa_mask);
-    sigint_handler.sa_flags = 0;
+    sigint_handler.sa_flags = SA_ONESHOT;
 
     sigaction(SIGINT, &sigint_handler, 0);
 
