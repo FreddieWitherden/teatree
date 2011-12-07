@@ -20,7 +20,7 @@
 #ifndef TEATREE_SIMULATION_OPEN_HPP
 #define TEATREE_SIMULATION_OPEN_HPP
 
-#include "accel/eval.hpp"
+#include "accel/open.hpp"
 #include "simulation/impl.hpp"
 #include "simulation/traits.hpp"
 #include "utils/name_traits.hpp"
@@ -43,17 +43,17 @@ class simulation_open : public simulation_impl< ScalarT
                                               , MulP
                                               , MacT
                                               , EfieldT
-                                              , accel_eval
+                                              , accel_open
                                               , PusherT
                                               >
 {
-public: // Ty[es
+public: // Types
     typedef simulation_impl< ScalarT
                            , Dim
                            , MulP
                            , MacT
                            , EfieldT
-                           , accel_eval
+                           , accel_open
                            , PusherT> base_type;
 
 public:

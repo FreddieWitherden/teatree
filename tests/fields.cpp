@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#include "accel/eval.hpp"
+#include "accel/open.hpp"
 #include "efield/plummer.hpp"
 #include "particle/particle.hpp"
 #include "particle/make_pseudo_particle.hpp"
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(pseudo2d)
     int nfail_md = 0, nfail_dq = 0, nfail_mq = 0;
 
     options_type opt; opt.epsilon(EPSILON).theta(0.6);
-    accel_eval<ef_q_type> ae(opt);
+    accel_open<ef_q_type> ae(opt);
 
     BOOST_FOREACH(const particle_type& tp, p)
     {

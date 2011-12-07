@@ -31,13 +31,13 @@
 
 #include <vector>
 
-namespace teatree { namespace accel_eval_
+namespace teatree { namespace accel_open_
 {
 
 using boost::counting_iterator;
 
 template<typename EfieldT>
-class accel_eval
+class accel_open
 {
 public: // Types & constants
     typedef EfieldT efield_type;
@@ -50,9 +50,9 @@ public: // Types & constants
     };
 
 public: // Constructors
-    accel_eval() {}
+    accel_open() {}
 
-    accel_eval(const simulation_options& so)
+    accel_open(const simulation_options& so)
         : so_(so)
     {}
 
@@ -74,7 +74,7 @@ private: // Member variables
 
 template<typename EfieldT>
 template<typename RandomInputRangeT, typename RandomOutputRangeT>
-void accel_eval<EfieldT>::operator()(scalar_type t,
+void accel_open<EfieldT>::operator()(scalar_type t,
                                      const RandomInputRangeT& in,
                                      RandomOutputRangeT& out)
 {
@@ -102,7 +102,7 @@ void accel_eval<EfieldT>::operator()(scalar_type t,
 
 template<typename EfieldT>
 template<typename ArchiveT>
-void accel_eval<EfieldT>::serialize(ArchiveT& ar, unsigned)
+void accel_open<EfieldT>::serialize(ArchiveT& ar, unsigned)
 {
     ar & idx_;
     ar & so_;
@@ -110,7 +110,7 @@ void accel_eval<EfieldT>::serialize(ArchiveT& ar, unsigned)
 
 }
 
-using accel_eval_::accel_eval;
+using accel_open_::accel_open;
 
 }
 

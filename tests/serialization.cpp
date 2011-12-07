@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#include "accel/eval.hpp"
+#include "accel/open.hpp"
 #include "efield/plummer.hpp"
 #include "mac/opening_angle.hpp"
 #include "particle/particle.hpp"
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(accel_eval_t)
     int N = 320;
     simulation_options so; so.theta(0.25).epsilon(1.0e-5);
 
-    accel_eval<ef_type> ae(so);
+    accel_open<ef_type> ae(so);
     serialize_test(ae);
 }
 
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
     typedef particle<Vector3f> particle_type;
     typedef pseudo_particle<particle_type,1> pseudo_particle_type;
     typedef efield_plummer<pseudo_particle_type,mac_opening_angle> ef_type;
-    typedef accel_eval<ef_type> accel_eval_type;
+    typedef accel_open<ef_type> accel_eval_type;
     typedef pusher_verlet<accel_eval_type> pusher_type;
 
     const int N = 320;

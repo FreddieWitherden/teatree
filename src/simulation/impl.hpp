@@ -20,7 +20,6 @@
 #ifndef TEATREE_SIMULATION_IMPL_HPP
 #define TEATREE_SIMULATION_IMPL_HPP
 
-#include "accel/eval.hpp"
 #include "particle/particle.hpp"
 #include "particle/pseudo_particle.hpp"
 #include "simulation/simulation.hpp"
