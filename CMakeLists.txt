@@ -158,13 +158,16 @@ INCLUDE(BoostTestTargets)
 
 ADD_BOOST_TEST(tree
   SOURCES tests/tree.cpp
-  TESTS construction2d construction3d)
+  TESTS construction2d construction3d
+  LIBRARIES ${Boost_LIBRARIES})
 ADD_BOOST_TEST(fields
   SOURCES tests/fields.cpp
-  TESTS plummer2d pseudo2d)
+  TESTS plummer2d pseudo2d
+  LIBRARIES ${Boost_LIBRARIES})
 ADD_BOOST_TEST(pusher
   SOURCES tests/pusher.cpp
-  TESTS order)
+  TESTS order
+  LIBRARIES ${Boost_LIBRARIES})
 ADD_BOOST_TEST(serialization
   SOURCES tests/serialization.cpp
   TESTS eigen simulation_options_t accel_eval_t pusher_verlet_t
