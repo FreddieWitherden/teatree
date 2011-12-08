@@ -45,7 +45,7 @@ public:
 
     template<typename ForwardRangeT>
     pusher_verlet(const ForwardRangeT& in,
-                  AccelEvalT acceleval, scalar_type t0, scalar_type dt)
+                  const AccelEvalT& acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
     {}
 

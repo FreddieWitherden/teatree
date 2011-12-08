@@ -63,7 +63,7 @@ public: // Constructors
 
     template<typename ForwardRangeT>
     pusher_comp_base(const ForwardRangeT& in,
-                     AccelEvalT acceleval, scalar_type t0, scalar_type dt)
+                     const AccelEvalT& acceleval, scalar_type t0, scalar_type dt)
         : base_type(in, acceleval, t0, dt)
     { init_coeffs(dt); }
 

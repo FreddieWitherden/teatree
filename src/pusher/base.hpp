@@ -116,6 +116,8 @@ public: // Simulation control
     void output(OutputItT out) const
     { rng::copy(pcurr_, out); }
 
+    accel_eval_type& acceleval() { return acceleval_; }
+
 private: // Pure virtuals
     /**
      *
