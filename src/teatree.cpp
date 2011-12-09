@@ -339,7 +339,7 @@ static void process_run(const std::string& input_file)
     struct sigaction sigint_handler;
     sigint_handler.sa_handler = &process_run_sigint;
     sigemptyset(&sigint_handler.sa_mask);
-    sigint_handler.sa_flags = SA_ONESHOT;
+    sigint_handler.sa_flags = SA_RESETHAND;
 
     sigaction(SIGINT, &sigint_handler, 0);
 
