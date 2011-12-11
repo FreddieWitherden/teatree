@@ -125,6 +125,8 @@ simulation_progress<ChronoClockT>::simulation_progress(int total_iter,
     , ncol_(80)
     , min_refresh_duration_(1.0/max_refresh_hz)
 {
+    BOOST_ASSERT(total_iter > 0);
+    BOOST_ASSERT(start_iter >= 0 && start_iter <= total_iter);
     BOOST_ASSERT(max_refresh_hz > 0);
 }
 
