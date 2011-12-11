@@ -168,7 +168,7 @@ std::istream& operator>>(std::istream& is, particle<VectorT>& p)
         is >> v[i];
     is >> q >> m;
 
-    p = particle<VectorT>(r, v, q, m);
+    p = is.good() ? particle<VectorT>(r, v, q, m) : particle<VectorT>();
 
     return is;
 }
