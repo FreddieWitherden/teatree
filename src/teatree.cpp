@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include "available_simulations.hpp"
+#include "simulation/progress.hpp"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -235,13 +236,19 @@ static void simulation_save(std::ostream& os, simulation_ptr sim)
     for_sim_type(sim_type, simulation_type_save<text_oarchive>(oa, sim));
 }
 
+static std::string simulation_base_name(const std::string& file_name)
+{
+    return file_name.substr(0, file_name.find("-", 0));
+}
+
 /**
  * Slot which is called after each completed iteration.  This takes
  *  care of updating the progress bar and of requesting premature
  *  termination if a SIGINT signal has been received.
  */
-static bool simulation_on_iteration(const simulation&,
-                                    simulation_progress<>& prog)
+static bool simulation_update_progress(const simulation&,
+                                       const simulation::iteration_stats&,
+                                       simulation_progress<>& prog)
 {
     // If we have been asked to break then do so
     if (sigint_caught)
@@ -253,6 +260,29 @@ static bool simulation_on_iteration(const simulation&,
         ++prog;
         return true;
     }
+}
+
+static bool simulation_process_stats(const simulation& sim,
+                                     const simulation::iteration_stats& stats,
+                                     std::ostream& os)
+{
+    // Unpack the iteration stats
+    double times[3]; int64_t vis[2];
+    boost::tie(times[0], times[1], times[2], vis[0], vis[1]) = stats;
+
+    std::ostringstream ss;
+    ss << std::setprecision(5);
+
+    ss << std::setw(6) << sim.completed_steps();
+    for (int i = 0; i < 3; ++i)
+        ss << std::setw(12) << times[i];
+    for (int i = 0; i < 2; ++i)
+        ss << std::setw(12) << vis[i];
+
+    // Write them out
+    os << ss.str() << "\n";
+
+    return true;
 }
 
 /**
@@ -305,9 +335,10 @@ static void process_run_sigint(int)
 /**
  * Handles the "run" command line action.
  */
-static void process_run(const std::string& input_file)
+static void process_run(const std::string& input_file, bool verbose)
 {
     std::ifstream ifs(input_file.c_str());
+    std::ofstream ofs_stats;
 
     if (!ifs.good())
         throw std::runtime_error("can't open " + input_file);
@@ -319,6 +350,25 @@ static void process_run(const std::string& input_file)
 
     std::cout << "Loaded simulation of type " << sim->type() << "\n";
     std::cout << "Parameters: " << sim->parameters() << "\n";
+
+    boost::shared_ptr<std::ostream> stat_of;
+
+    // In verbose mode output per-iteration statistics
+    if (verbose)
+    {
+        // Compute the stats file name and open the file
+        const std::string name = sim->options().output_basename()
+                               + "-stats.txt";
+        ofs_stats.open(name.c_str());
+
+        // Register the callback to output the stats
+        sim->do_on_iteration(boost::bind(&simulation_process_stats,
+                                         _1, _2, boost::ref(ofs_stats)));
+
+
+        std::cout << "Writing iteration statistics to " << name << "\n";
+
+    }
 
     const int completed = sim->completed_steps();
     const int total     = sim->total_steps();
@@ -332,8 +382,8 @@ static void process_run(const std::string& input_file)
     simulation_progress<> prog(total, completed);
 
     // Register our callback to update the progress bar
-    sim->do_on_iteration(boost::bind(&simulation_on_iteration,
-                                     _1, boost::ref(prog)));
+    sim->do_on_iteration(boost::bind(&simulation_update_progress,
+                                     _1, _2, boost::ref(prog)));
 
     // Handle Ctrl+C (aka SIGINT)
     struct sigaction sigint_handler;
@@ -352,7 +402,7 @@ static void process_run(const std::string& input_file)
     if (save)
     {
         // Get the base name of the simulation "foo-00100.tts" => "foo"
-        const std::string name = input_file.substr(0, input_file.find("-", 0));
+        const std::string name = simulation_base_name(input_file);
 
         // Generate the new file name of the form "foo-<completed>.tts"
         std::ostringstream os;
@@ -391,7 +441,9 @@ int main(int argc, char* argv[])
     generic_opt.add_options()
     ("help", "Displays this information")
     ("version", "Displays version information")
-    ("config,c", value<std::string>(), "Configuration file");
+    ("config,c", value<std::string>(), "Configuration file")
+    ("verbose,v", value<bool>()->default_value(false)->zero_tokens(),
+     "Enable verbose output");
 
     // Init specific options
     options_description init_opt("Init options");
@@ -521,7 +573,8 @@ int main(int argc, char* argv[])
                          simulation_type, so);
         }
         else if (action == "run")
-            process_run(cli_vm["input-file"].as<std::string>());
+            process_run(cli_vm["input-file"].as<std::string>(),
+                        cli_vm["verbose"].as<bool>());
         else
             throw std::invalid_argument("bad action");
     }

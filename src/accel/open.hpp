@@ -24,9 +24,13 @@
 #include "particle/typedefs.hpp"
 #include "simulation/options.hpp"
 
+#include <boost/chrono.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 
 #include <vector>
 
@@ -46,12 +50,21 @@ public: // Types & constants
         multipole_order = pseudo_particle_type::multipole_order
     };
 
+    typedef boost::signals2::signal< void (scalar_type, scalar_type,
+                                           int64_t, int64_t)
+                                   > accel_timings_signal_type;
+
 public: // Constructors
-    accel_open() {}
+    accel_open() : accel_timings_(new accel_timings_signal_type) {}
 
     accel_open(const simulation_options& so)
         : so_(so)
+        , accel_timings_(new accel_timings_signal_type)
     {}
+
+    template<typename SlotT>
+    boost::signals2::connection connect_accel_timings(const SlotT& slot)
+    { return accel_timings_->connect(slot); }
 
     template<typename RandomInputRangeT, typename RandomOutputRangeT>
     void operator()(scalar_type t,
@@ -67,6 +80,7 @@ private: // Serialization
 private: // Member variables
     std::vector<int> idx_;
     simulation_options so_;
+    boost::shared_ptr<accel_timings_signal_type> accel_timings_;
 };
 
 template<typename EfieldT>
@@ -75,8 +89,10 @@ void accel_open<EfieldT>::operator()(scalar_type t,
                                      const RandomInputRangeT& in,
                                      RandomOutputRangeT& out)
 {
+    using namespace boost::chrono;
     using boost::counting_iterator;
 
+    // Convenience values
     const int N = in.size();
     const scalar_type inv_dimnd = 1.0/(dimension*so_.nd());
 
@@ -84,19 +100,34 @@ void accel_open<EfieldT>::operator()(scalar_type t,
     if (idx_.empty())
         idx_.assign(counting_iterator<int>(0), counting_iterator<int>(N));
 
+    // Save the time when we started building the tree
+    const steady_clock::time_point start_time = steady_clock::now();
+
     // Build the tree to yield a pseudo particle
     const pseudo_particle_type pp = make_pseudo_particle<multipole_order>
                                         (in.begin(), idx_.begin(), idx_.end());
 
+    // Save the time when we finished building the three
+    const steady_clock::time_point tree_time = steady_clock::now();
+
+    // Keep track of the number of particles/pseudo particles visited
+    int64_t pvis = 0, ppvis = 0;
+
     // Iterate over each particle in the tree and compute the acceleration
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic) reduction(+:pvis,ppvis)
     for (int i = 0; i < N; ++i)
     {
         const particle_type& p = in[i];
         const efield_type ef(p.r(), so_);
 
         out[i] = inv_dimnd*p.qtom()*pp.visit_children(ef);
+        pvis += ef.leaves_visited(); ppvis += ef.branches_visited();
     }
+
+    // Compute times and fire off our signal
+    const duration<double> tree_dur  = tree_time - start_time;
+    const duration<double> visit_dur = steady_clock::now() - tree_time;
+    (*accel_timings_)(tree_dur.count(), visit_dur.count(), pvis, ppvis);
 }
 
 template<typename EfieldT>

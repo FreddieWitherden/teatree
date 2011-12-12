@@ -20,10 +20,12 @@
 #ifndef TEATREE_SIMULATION_SIMULATION_HPP
 #define TEATREE_SIMULATION_SIMULATION_HPP
 
-#include "simulation/progress.hpp"
+#include "utils/signals_max_combiner.hpp"
 
+#include <boost/cstdint.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/signals2.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <string>
 #include <fstream>
@@ -37,8 +39,14 @@ namespace teatree
  */
 class simulation
 {
+public: // Types
+    typedef boost::tuple< double, double, double, int64_t, int64_t
+                        > iteration_stats;
+
 private: // Types
-    typedef boost::signals2::signal< bool (const simulation& sim)
+    typedef boost::signals2::signal< bool (const simulation&,
+                                           const iteration_stats&)
+                                   , signals_maximum_combiner<bool>
                                    > on_iteration_signal_type;
 
 public: // Constructors & destructors
@@ -73,6 +81,12 @@ public: // Public methods for controlling a simulation
     std::string parameters() const;
 
     /**
+     * Returns the options which were specified when the simulation was
+     *  created.
+     */
+    const simulation_options& options() const { return so_; }
+
+    /**
      * Returns the number of particles being simulated.
      */
     int num_particles() const { return do_num_particles(); }
@@ -98,7 +112,7 @@ private: // Pure virtuals
     /**
      * Performs one iteration of the simulation.
      */
-    virtual void do_iteration() = 0;
+    virtual iteration_stats do_iteration() = 0;
 
     virtual std::string do_type() const = 0;
 
@@ -128,6 +142,8 @@ private: // Members
 
 inline bool simulation::run()
 {
+    iteration_stats stats;
+
     /*
      * Run the actual simulation until we either finish or are asked
      * to break.
@@ -135,12 +151,12 @@ inline bool simulation::run()
     do
     {
         // Perform the iteration
-        do_iteration(); ++completed_steps_;
+        stats = do_iteration(); ++completed_steps_;
 
         // See if we should output anything
         if (so_.output_step(completed_steps_))
             output();
-    } while (*on_iteration_(*this)
+    } while (on_iteration_(*this, stats)
           && completed_steps_ != so_.nsteps());
 
     // If there are iterations remaining then the run was broken
