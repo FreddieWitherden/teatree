@@ -383,9 +383,8 @@ static void notify_output_steps(simulation_options* so,
 
 int main(int argc, char* argv[])
 {
-    std::string action, simulation_type, input_file, output_file;
+    std::string simulation_type;
     simulation_options so;
-    variables_map vm;
 
     // Generic command line options
     options_description generic_opt("Generic options");
@@ -398,42 +397,46 @@ int main(int argc, char* argv[])
     options_description init_opt("Init options");
     init_opt.add_options()
     ("simulation-type,t",
-     value(&simulation_type)->notifier(validate_simulation_type),
+     value(&simulation_type)->notifier(validate_simulation_type)->required(),
      "Type of simulation to create; see below for available types")
     ("output-steps,s",
-     value<std::vector<std::string> >()->multitoken()->composing()
+     value<std::vector<std::string> >()->multitoken()->composing()->required()
      ->notifier(bind(&notify_output_steps, &so, arg1)),
      "Steps where output should be generated")
     ("base-name,o",
-     value<std::string>()
-     ->notifier(bind(&simulation_options::output_basename, &so, arg1))
-     ->default_value("out"),
+     value<std::string>()->default_value("out")
+                         ->notifier(bind(&simulation_options::output_basename,
+                                         &so, arg1)),
      "Base file name for generated output; combined with the iteration count "
      "to give the output file name <base>-<iter #>.txt")
     ("no-header,p",
      value<bool>()->zero_tokens()
-     ->notifier(bind(&simulation_options::output_header, &so, !arg1)),
+                  ->notifier(bind(&simulation_options::output_header, &so, !arg1)),
      "Do not include a header in generated output files")
-    ("nd,n",
-     value<double>()->notifier(bind(&simulation_options::nd, &so, arg1)),
+    ("nd",
+     value<double>()->required()
+                    ->notifier(bind(&simulation_options::nd, &so, arg1)),
      "Number of electrons/ions in the Debye sphere/circle; this is required "
      "to correctly characterise the evolution of the plasma")
     ("epsilon",
-     value<double>()->notifier(bind(&simulation_options::epsilon, &so, arg1)),
+     value<double>()->required()
+                    ->notifier(bind(&simulation_options::epsilon, &so, arg1)),
      "Plummer softening parameter > 0")
     ("dt",
-     value<double>()->notifier(bind(&simulation_options::dt, &so, arg1)),
+     value<double>()->required()
+                    ->notifier(bind(&simulation_options::dt, &so, arg1)),
      "Particle pusher timestep > 0")
     ("theta",
-     value<double>()->notifier(bind(&simulation_options::theta, &so, arg1)),
+     value<double>()->required()
+                    ->notifier(bind(&simulation_options::theta, &so, arg1)),
      "MAC parameter >= 0");
 
     // Hidden (positional) options
     options_description hidden_opt("Hidden options");
     hidden_opt.add_options()
-    ("action",     value(&action)->required(),     "action")
-    ("input-file", value(&input_file)->required(), "input file")
-    ("output-file",value(&output_file),            "output name");
+    ("action",     value<std::string>(), "action")
+    ("input-file", value<std::string>(), "input file")
+    ("output-file",value<std::string>(), "output name");
 
     positional_options_description pdesc;
     pdesc.add("action", 1)
@@ -442,7 +445,7 @@ int main(int argc, char* argv[])
 
     // Valid options on the command line
     options_description cli_opt("Command line options");
-    cli_opt.add(generic_opt).add(init_opt).add(hidden_opt);
+    cli_opt.add(generic_opt).add(hidden_opt).add(init_opt);
 
     // Valid options inside of a config file
     options_description config_opt("Configuration file options");
@@ -450,17 +453,22 @@ int main(int argc, char* argv[])
 
     try
     {
-        // Parse the full set of CLI arguments
-        store(command_line_parser(argc, argv).
-              options(cli_opt).positional(pdesc).run(), vm);
+        variables_map cli_vm;
 
-        // If a config file was specified then load it
-        if (vm.count("config"))
-            store(parse_config_file<char>(vm["config"].as<std::string>().c_str(),
-                                          config_opt), vm);
+        /*
+         * Argument parsing is a little complicated as, depending on
+         * the action, we support various sets of arguments.  Here we
+         * parse all available options but do not validate or notify
+         * any of them.  Validation is performed only once the action
+         * is known.
+         */
+        store(command_line_parser(argc, argv).options(cli_opt)
+                                             .positional(pdesc)
+                                             .run(),
+              cli_vm);
 
         // Handle --version
-        if (vm.count("version"))
+        if (cli_vm.count("version"))
         {
             std::cout << "teatree "   TEATREE_VERSION
                          " (" TEATREE_GIT_SHA1 ")"
@@ -469,13 +477,15 @@ int main(int argc, char* argv[])
         }
 
         // Handle --help (or display if required arguments are missing)
-        if (vm.count("help") || !vm.count("action") || !vm.count("input-file"))
+        if (cli_vm.count("help")
+         || !cli_vm.count("action")
+         || !cli_vm.count("input-file"))
         {
             // General help
             std::cout << "Usage: teatree [OPTION...] <action> <action args>\n"
                          "<action> is one of\n"
                          "  init <[IN] particle file> <[OUT] simulation name>\n"
-                         "  run  <[IN] simulation file>\n"
+                         "  run  <[IN] simulation file>\n\n"
                       << generic_opt << "\n"
                       << init_opt << "\n";
             // Supported simulation types + descriptions
@@ -484,14 +494,34 @@ int main(int argc, char* argv[])
             return 0;
         }
 
-        // Fire any callbacks we might have installed to catch bad parameters
-        notify(vm);
-
         // Process the action
+        const std::string& action = cli_vm["action"].as<std::string>();
         if (action == "init")
-            process_init(input_file, output_file, simulation_type, so);
+        {
+            variables_map init_vm;
+
+            // Process the init specific options
+            store(command_line_parser(argc, argv).options(init_opt)
+                                                 .allow_unregistered()
+                                                 .run(),
+                  init_vm);
+
+            // If a config file was specified then parse it
+            if (cli_vm.count("config"))
+                store(parse_config_file<char>(cli_vm["config"].as<std::string>()
+                                                              .c_str(),
+                                              config_opt),
+                      init_vm);
+
+            // Call notify to perform parameter validation on the init options
+            notify(init_vm);
+
+            process_init(cli_vm["input-file"].as<std::string>(),
+                         cli_vm["output-file"].as<std::string>(),
+                         simulation_type, so);
+        }
         else if (action == "run")
-            process_run(input_file);
+            process_run(cli_vm["input-file"].as<std::string>());
         else
             throw std::invalid_argument("bad action");
     }
