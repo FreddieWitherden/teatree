@@ -40,7 +40,12 @@ namespace teatree
 class simulation
 {
 public: // Types
-    typedef boost::tuple< double, double, double, int64_t, int64_t
+    typedef boost::tuple< double    // Time spent tree building
+                        , double    // Time spent visiting particles
+                        , double    // Time spent pushing particles
+                        , int64_t   // Total # particles visited
+                        , int64_t   // Total # pseudo particles visited
+                        , int       // Number of accel evals performed
                         > iteration_stats;
 
 private: // Types

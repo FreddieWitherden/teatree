@@ -267,8 +267,8 @@ static bool simulation_process_stats(const simulation& sim,
                                      std::ostream& os)
 {
     // Unpack the iteration stats
-    double times[3]; int64_t vis[2];
-    boost::tie(times[0], times[1], times[2], vis[0], vis[1]) = stats;
+    double times[3]; int64_t vis[2]; int neval;
+    boost::tie(times[0], times[1], times[2], vis[0], vis[1], neval) = stats;
 
     std::ostringstream ss;
     ss << std::setprecision(5);
@@ -278,6 +278,7 @@ static bool simulation_process_stats(const simulation& sim,
         ss << std::setw(12) << times[i];
     for (int i = 0; i < 2; ++i)
         ss << std::setw(12) << vis[i];
+    ss << std::setw(6) << neval;
 
     // Write them out
     os << ss.str() << "\n";

@@ -104,6 +104,9 @@ private: // Virtual methods
         tree_time_ = particle_time_ = 0.0;
         particles_visited_ = pparticles_visited_ = 0;
 
+        // Get the number of acceleration evals before advancing
+        const int init_neval = particle_pusher_.num_acceleval();
+
         // Get the current time
         const steady_clock::time_point start_time = steady_clock::now();
 
@@ -118,7 +121,8 @@ private: // Virtual methods
                           particle_time_,
                           net_push_time.count() - tree_time_ - particle_time_,
                           particles_visited_,
-                          pparticles_visited_);
+                          pparticles_visited_,
+                          particle_pusher_.num_acceleval() - init_neval);
     }
 
     int do_num_particles() const { return particle_pusher_.num_particles(); }
