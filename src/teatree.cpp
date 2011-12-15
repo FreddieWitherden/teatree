@@ -252,13 +252,13 @@ static bool simulation_update_progress(const simulation&,
 {
     // If we have been asked to break then do so
     if (sigint_caught)
-        return false;
+        return true;
     // Otherwise update the progress bar and return true
     else
     {
         // Update the progress bar
         ++prog;
-        return true;
+        return false;
     }
 }
 
@@ -283,7 +283,7 @@ static bool simulation_process_stats(const simulation& sim,
     // Write them out
     os << ss.str() << "\n";
 
-    return true;
+    return false;
 }
 
 /**

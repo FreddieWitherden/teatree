@@ -151,7 +151,7 @@ inline bool simulation::run()
 
     /*
      * Run the actual simulation until we either finish or are asked
-     * to break.
+     * to break (indicated by a slot returning true).
      */
     do
     {
@@ -161,7 +161,7 @@ inline bool simulation::run()
         // See if we should output anything
         if (so_.output_step(completed_steps_))
             output();
-    } while (on_iteration_(*this, stats)
+    } while (on_iteration_(*this, stats) == false
           && completed_steps_ != so_.nsteps());
 
     // If there are iterations remaining then the run was broken
