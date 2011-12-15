@@ -63,6 +63,30 @@ struct moments_shift<ScalarT,2,2>
     }
 };
 
+/**
+ * Shifts the octupole moment in 2D.
+ */
+template<typename ScalarT>
+struct moments_shift<ScalarT,2,3>
+{
+    typedef particle_moments<ScalarT,2,3> moments_type;
+
+    template<typename ArrayT> TEATREE_STRONG_INLINE
+    static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
+    {
+        // Diagonal; compute Oxxx and Oyyy together
+        const ArrayT pO = ArrayT(d.Oxxx,d.Oyyy) - 3*r*ArrayT(d.Qxx,d.Qyy)
+                        + 3*r*r*ArrayT(d.Dx,d.Dy) - r*r*r*d.M;
+        p.Oxxx += pO.x(); p.Oyyy += pO.y();
+
+        // Off diagonal
+        const ArrayT pOd = ArrayT(d.Oxxy,d.Oxyy) - 2*r*d.Qxy
+                         - r.yx()*ArrayT(d.Qxx,d.Qyy) + r*r*ArrayT(d.Dy,d.Dx)
+                         + 2*r*r.yx()*ArrayT(d.Dx,d.Dy) - r*r*r.yx()*d.M;
+        p.Oxxy += pOd.x(); p.Oxyy += pOd.y();
+    }
+};
+
 }
 
 #endif // TEATREE_PARTICLE_MOMENTS_SHIFT_2D_HPP

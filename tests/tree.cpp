@@ -31,9 +31,6 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/accumulators/statistics/covariance.hpp>
-#include <boost/accumulators/statistics/variates/covariate.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include <boost/random/lagged_fibonacci.hpp>
@@ -88,7 +85,7 @@ BOOST_AUTO_TEST_CASE(construction2d)
 {
     // Type of particle and visitors being used for the test
     typedef particle<Vector2d> particle_type;
-    typedef pseudo_particle<particle_type,2> pseudo_particle_type;
+    typedef pseudo_particle<particle_type,3> pseudo_particle_type;
     typedef min_visitor<pseudo_particle_type> min_visitor_type;
     typedef counting_visitor<pseudo_particle_type> counting_visitor_type;
 
@@ -96,19 +93,17 @@ BOOST_AUTO_TEST_CASE(construction2d)
     lagged_fibonacci607 eng(31415);
     uniform_real_distribution<> xdist(-50.0, 200.0), ydist(1, 200.0);
 
-    /*
-     * Statistical accumulators; mean, min and max are for checking the core
-     * pseudo particle properties while the variance and covariance are for
-     * checking the quadrupole moments.
-     */
+    // General statistical accumulators
     acc::accumulator_set< double
                         , acc::stats< acc::tag::mean
                                     , acc::tag::min
                                     , acc::tag::max
-                                    , acc::tag::lazy_variance
-                                    , acc::tag::covariance< double
-                                                          , acc::tag::covariate1
-                        > > > xacc, yacc;
+                        > > xacc, yacc;
+
+    // Multipole moment accumulators
+    acc::accumulator_set< double
+                        , acc::stats<acc::tag::sum>
+                        > Qxx, Qyy, Qxy, Oxxx, Oyyy, Oxxy, Oxyy;
 
     // Particle storage
     std::vector<particle_type> p;
@@ -119,12 +114,23 @@ BOOST_AUTO_TEST_CASE(construction2d)
     {
         const double x = xdist(eng), y = ydist(eng);
 
-        xacc(x, acc::covariate1 = y); yacc(y, acc::covariate1 = x);
+        xacc(x); yacc(y);
         p.push_back(particle_type(Vector2d(x, y), Vector2d::Zero(), 1, 1));
     }
 
     // Create the tree
-    const pseudo_particle_type pp = make_pseudo_particle<2>(p.begin(), p.end());
+    const pseudo_particle_type pp = make_pseudo_particle<3>(p.begin(), p.end());
+
+    // Manually compute the (relevant) multipole moments
+    for (int i = 0; i < N; ++i)
+    {
+        const Vector2d R = p[i].r() - pp.r();
+        const double q   = p[i].q();
+
+        Qxx(q*R.x()*R.x()); Qyy(q*R.y()*R.y()); Qxy(q*R.x()*R.y());
+        Oxxx(q*R.x()*R.x()*R.x()); Oyyy(q*R.y()*R.y()*R.y());
+        Oxxy(q*R.x()*R.x()*R.y()); Oxyy(q*R.x()*R.y()*R.y());
+    }
 
     // Create and run the minimum visitor over the leaf nodes
     min_visitor_type mv;
@@ -157,13 +163,16 @@ BOOST_AUTO_TEST_CASE(construction2d)
     BOOST_CHECK_SMALL(pp.moments().Dx, TOL);
     BOOST_CHECK_SMALL(pp.moments().Dy, TOL);
 
-    // The diagonal quadrupole moment should be N*Var(p.[xy])
-    BOOST_CHECK_CLOSE(pp.moments().Qxx, N*acc::variance(xacc), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qyy, N*acc::variance(yacc), TOL);
+    // Quadrupole moments
+    BOOST_CHECK_CLOSE(pp.moments().Qxx, acc::sum(Qxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qyy, acc::sum(Qyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxy, acc::sum(Qxy), TOL);
 
-    // Off diagonal quadrupole moment should be N*Cov(p.x,p.y)
-    BOOST_CHECK_CLOSE(acc::covariance(xacc), acc::covariance(yacc), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qxy, N*acc::covariance(xacc), TOL);
+    // Octupole moments
+    BOOST_CHECK_CLOSE(pp.moments().Oxxx, acc::sum(Oxxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oyyy, acc::sum(Oyyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxxy, acc::sum(Oxxy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxyy, acc::sum(Oxyy), TOL);
 }
 
 /**

@@ -88,6 +88,30 @@ struct efield_moments<PParticleT,2,2>
     }
 };
 
+/**
+ * 2D Octupole field.
+ */
+template<typename PParticleT>
+struct efield_moments<PParticleT,3,2>
+{
+    TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
+
+    static TEATREE_STRONG_INLINE
+    vector_type exec(const particle_moments_type& m,
+                     const vector_type& R, scalar_type invR2)
+    {
+        const scalar_type invR8 = invR2*invR2*invR2*invR2;
+
+        const array_type Oxxx(m.Oxxx,m.Oyyy), Oyyy(Oxxx.yx());
+        const array_type Oxxy(m.Oxxy,m.Oxyy), Oxyy(Oxxy.yx());
+        const array_type x(R)               , y(x.yx());
+        const array_type x2(x*x)            , y2(x2.yx());
+
+        return ((Oxxx-3*Oxyy)*(y2-2*x*y-x2)*(y2+2*x*y-x2)
+             + 4*x*y*(y2-x2)*(Oyyy-3*Oxxy))*invR8;
+    }
+};
+
 }
 
 #endif // TEATREE_EFIELD_MOMENTS_MOMENTS_2D_HPP
