@@ -113,12 +113,12 @@ SET(TEATREE_HEADERS
     src/mac/base.hpp
     src/mac/min_dist.hpp
     src/mac/opening_angle.hpp
+    src/particle/moments/moments.hpp
     src/particle/moments/shift_2d.hpp
     src/particle/moments/shift_3d.hpp
     src/particle/moments/shift_recurse.hpp
     src/particle/moments/traits.hpp
     src/particle/moments/visitor.hpp
-    src/particle/moments.hpp
     src/particle/particle.hpp
     src/particle/partition.hpp
     src/particle/pseudo_particle.hpp
