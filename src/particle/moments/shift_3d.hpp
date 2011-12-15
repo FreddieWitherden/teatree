@@ -35,7 +35,7 @@ struct moments_shift<ScalarT,3,1>
 {
     typedef particle_moments<ScalarT,3,1> moments_type;
 
-    template<typename ArrayT> TEATREE_STRONG_INLINE
+    template<typename ArrayT> TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
         const ArrayT pD = ArrayT(d.Dx,d.Dy,d.Dz) - r*d.M;
@@ -51,7 +51,7 @@ struct moments_shift<ScalarT,3,2>
 {
     typedef particle_moments<ScalarT,3,2> moments_type;
 
-    template<typename ArrayT> TEATREE_STRONG_INLINE
+    template<typename ArrayT> TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
         const ArrayT D(d.Dx,d.Dy,d.Dz);

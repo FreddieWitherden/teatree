@@ -39,7 +39,7 @@ struct efield_moments<PParticleT,0,3>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static TEATREE_STRONG_INLINE
+    static TEATREE_FLATTEN
     vector_type exec(const particle_moments_type& m,
                      const vector_type& R, scalar_type invR)
     {
@@ -55,7 +55,7 @@ struct efield_moments<PParticleT,1,3>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static TEATREE_STRONG_INLINE
+    static TEATREE_FLATTEN
     vector_type exec(const particle_moments_type& m,
                      const array_type& R, scalar_type invR)
     {
@@ -80,7 +80,7 @@ struct efield_moments<PParticleT,2,3>
 {
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    static TEATREE_STRONG_INLINE
+    static TEATREE_FLATTEN
     vector_type exec(const particle_moments_type& m,
                      const array_type& R, scalar_type invR)
     {

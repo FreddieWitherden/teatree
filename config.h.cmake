@@ -6,12 +6,12 @@
 #endif
 
 /*
- * Strong inline directive
+ * Function flattening
  */
 #if defined(__GNUC__)
-# define TEATREE_STRONG_INLINE __attribute__((always_inline))
+# define TEATREE_FLATTEN __attribute__((flatten))
 #else
-# define TEATREE_STRONG_INLINE 
+# define TEATREE_FLATTEN 
 #endif
 
 #define EIGEN_ARRAYBASE_PLUGIN  "utils/eigen_addons.hpp"

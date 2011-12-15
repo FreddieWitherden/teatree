@@ -33,7 +33,7 @@ struct moments_shift_recurse
 {
     typedef particle_moments<ScalarT,Dim,MultP> moments_type;
 
-    template<typename ArrayT> TEATREE_STRONG_INLINE
+    template<typename ArrayT> TEATREE_FLATTEN
     static void exec(moments_type& m, const moments_type& d, const ArrayT& r)
     {
         // Shift the MultP moment
@@ -49,7 +49,7 @@ struct moments_shift_recurse<ScalarT,Dim,0>
 {
     typedef particle_moments<ScalarT,Dim,0> moments_type;
 
-    template<typename ArrayT> TEATREE_STRONG_INLINE
+    template<typename ArrayT> TEATREE_FLATTEN
     static void exec(moments_type&, const moments_type&, const ArrayT&)
     {
         // No-op as the monopole moment does not require shifting

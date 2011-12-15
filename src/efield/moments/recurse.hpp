@@ -50,7 +50,7 @@ struct efield_moments_recurse
                                   , MulP - 1
                                   > efield_moments_recurse_type;
 
-    static TEATREE_STRONG_INLINE
+    static TEATREE_FLATTEN
     vector_type exec(const pseudo_particle_type& pp,
                      const vector_type& R,
                      scalar_type invRn)
@@ -71,7 +71,7 @@ struct efield_moments_recurse<PParticleT,0>
                           , pseudo_particle_type::dimension
                           > efield_moments_type;
 
-    static TEATREE_STRONG_INLINE
+    static TEATREE_FLATTEN
     vector_type exec(const pseudo_particle_type& pp,
                      const vector_type& R,
                      scalar_type invRn)
