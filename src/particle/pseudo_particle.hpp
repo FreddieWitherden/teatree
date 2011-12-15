@@ -51,8 +51,7 @@ public: // Types & constants
 
     enum constants {
         dimension       = particle_type::dimension,
-        multipole_order = MultP,
-        num_children    = ipow<2,dimension>::value
+        multipole_order = MultP
     };
 
     typedef tree_branch< const ParticleT
