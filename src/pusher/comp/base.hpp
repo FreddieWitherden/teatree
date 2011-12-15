@@ -125,7 +125,6 @@ void pusher_comp_base<AccelEvalT,CoeffsT>::take_step(const particle_range& in,
         this->accel_eval(t, out, accel);
 
         // Update the velocities and positions
-        #pragma omp parallel for schedule(static) if (N > 5000)
         for (int j = 0; j < N; ++j)
         {
             out[j].v() += hg_[i]*accel[j];
