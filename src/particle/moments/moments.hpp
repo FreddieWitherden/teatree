@@ -17,8 +17,8 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PARTICLE_MOMENTS_HPP
-#define TEATREE_PARTICLE_MOMENTS_HPP
+#ifndef TEATREE_PARTICLE_MOMENTS_MOMENTS_HPP
+#define TEATREE_PARTICLE_MOMENTS_MOMENTS_HPP
 
 #include <boost/static_assert.hpp>
 
@@ -109,4 +109,4 @@ struct particle_moments<ScalarT,3,3> : public particle_moments<ScalarT,3,2>
 
 }
 
-#endif // TEATREE_PARTICLE_MOMENTS_HPP
+#endif // TEATREE_PARTICLE_MOMENTS_MOMENTS_HPP

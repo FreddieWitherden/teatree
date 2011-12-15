@@ -20,7 +20,7 @@
 #ifndef TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP
 #define TEATREE_PARTICLE_PSEUDO_PARTICLE_HPP
 
-#include "particle/moments.hpp"
+#include "particle/moments/moments.hpp"
 #include "particle/moments/visitor.hpp"
 #include "particle/pseudo_particle_visitor.hpp"
 #include "particle/typedefs.hpp"
