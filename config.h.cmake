@@ -14,8 +14,9 @@
 # define TEATREE_FLATTEN 
 #endif
 
-#define EIGEN_ARRAYBASE_PLUGIN  "utils/eigen_addons.hpp"
-#define EIGEN_MATRIXBASE_PLUGIN "utils/eigen_addons.hpp"
+//#define EIGEN_ARRAYBASE_PLUGIN  "utils/eigen_addons.hpp"
+//#define EIGEN_MATRIXBASE_PLUGIN "utils/eigen_addons.hpp"
+#define EIGEN_DENSEBASE_PLUGIN "utils/eigen_addons.hpp"
 
 #define TEATREE_BUILD_DATE "@TEATREE_BUILD_DATE@"
 

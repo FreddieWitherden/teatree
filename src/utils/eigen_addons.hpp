@@ -22,14 +22,16 @@
  * by config.h.  Given m = [x, y, z]; m.xxz() = [x, x, z].
  */
 
-#define PER2(a,b) PlainObject a##b() const \
-                  { return PlainObject(this->a(), this->b()); }
+#define PER2(a,b) Derived a##b() const \
+                  { return Derived(this->a(), this->b()); }
 PER2(x,x) PER2(x,y)
-PER2(y,x) PER2(y,y)
+          PER2(y,y)
 #undef PER2
 
-#define PER3(a,b,c) PlainObject a##b##c() const \
-                    { return PlainObject(this->a(), this->b(), this->c()); }
+ConstReverseReturnType yx() const { return reverse(); }
+
+#define PER3(a,b,c) Derived a##b##c() const \
+                    { return Derived(this->a(), this->b(), this->c()); }
 PER3(x,x,x) PER3(x,x,y) PER3(x,x,z)
 PER3(x,y,x) PER3(x,y,y) PER3(x,y,z)
 PER3(x,z,x) PER3(x,z,y) PER3(x,z,z)
