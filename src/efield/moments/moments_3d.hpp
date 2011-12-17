@@ -64,11 +64,9 @@ struct efield_moments<PParticleT,1,3>
 
         const array_type x(R), y(x.yzx()), z(x.zxy());
 
-        const array_type D(m.Dx,m.Dy,m.Dz);
-
-        return (x*x*inv3R5 - invR3)*D
-             + x*inv3R5*(y*D.yzx()
-                       + z*D.zxy());
+        return (x*x*inv3R5 - invR3)*m.Dx
+             + x*inv3R5*(y*m.Dx.yzx()
+                       + z*m.Dx.zxy());
     }
 };
 
@@ -87,18 +85,15 @@ struct efield_moments<PParticleT,2,3>
         const scalar_type inv3R5  = 3*std::pow(invR, 5);
         const scalar_type inv15R7 = 15*std::pow(invR, 7);
 
-        const array_type x(R)    , y(x.yzx())  , z(x.zxy());
-        const array_type x2(x*x) , y2(x2.yzx()), z2(x2.zxy());
+        const array_type x(R)   , y(x.yzx())  , z(x.zxy());
+        const array_type x2(x*x), y2(x2.yzx()), z2(x2.zxy());
 
-        const array_type Qxx(m.Qxx, m.Qyy ,m.Qzz);
-        const array_type Qxy(m.Qxy, m.Qxz, m.Qyz);
-
-        return 0.5*x*((x2*inv15R7 - 3*inv3R5)*Qxx
-                    + (y2*inv15R7 - inv3R5)*Qxx.yzx()
-                    + (z2*inv15R7 - inv3R5)*Qxx.zyx())
-             + y*(x2*inv15R7 - inv3R5)*Qxy
-             + z*(x2*inv15R7 - inv3R5)*Qxy.yzx()
-             + (x*y*z*inv15R7)*Qxy.zxy();
+        return 0.5*x*((x2*inv15R7 - 3*inv3R5)*m.Qxx
+                    + (y2*inv15R7 - inv3R5)*m.Qxx.yzx()
+                    + (z2*inv15R7 - inv3R5)*m.Qxx.zyx())
+             + y*(x2*inv15R7 - inv3R5)*m.Qxy
+             + z*(x2*inv15R7 - inv3R5)*m.Qxy.yzx()
+             + (x*y*z*inv15R7)*m.Qxy.zxy();
     }
 };
 

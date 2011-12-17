@@ -25,85 +25,80 @@
 namespace teatree
 {
 
-template<typename ScalarT, int Dim, int MultP>
+template<typename ArrayT, int Dim, int MultP>
 struct particle_moments
 {
-    BOOST_STATIC_ASSERT_MSG(sizeof(ScalarT) == 0, "Invalid multipole order");
+    BOOST_STATIC_ASSERT_MSG(sizeof(ArrayT) == 0, "Invalid multipole order");
 };
 
 /// Monopole
-template<typename ScalarT, int Dim>
-struct particle_moments<ScalarT,Dim,0>
+template<typename ArrayT, int Dim>
+struct particle_moments<ArrayT,Dim,0>
 {
-    ScalarT M;
+    typename ArrayT::Scalar M;
 
     particle_moments() : M(0.0) {}
 };
 
 /// 2D Dipole
-template<typename ScalarT>
-struct particle_moments<ScalarT,2,1> : public particle_moments<ScalarT,2,0>
+template<typename ArrayT>
+struct particle_moments<ArrayT,2,1> : public particle_moments<ArrayT,2,0>
 {
-    ScalarT Dx, Dy;
+    ArrayT Dx;
 
-    particle_moments() : Dx(0.0), Dy(0.0) {}
+    particle_moments() : Dx(ArrayT::Zero()) {}
 };
 
 /// 3D Dipole
-template<typename ScalarT>
-struct particle_moments<ScalarT,3,1> : public particle_moments<ScalarT,3,0>
+template<typename ArrayT>
+struct particle_moments<ArrayT,3,1> : public particle_moments<ArrayT,3,0>
 {
-    ScalarT Dx, Dy, Dz;
+    ArrayT Dx;
 
-    particle_moments() : Dx(0.0), Dy(0.0), Dz(0.0) {}
+    particle_moments() : Dx(ArrayT::Zero()) {}
 
 };
 
 /// 2D Quadrupole
-template<typename ScalarT>
-struct particle_moments<ScalarT,2,2> : public particle_moments<ScalarT,2,1>
+template<typename ArrayT>
+struct particle_moments<ArrayT,2,2> : public particle_moments<ArrayT,2,1>
 {
-    ScalarT Qxx, Qxy;
-    ScalarT      Qyy;
+    ArrayT Qxx;
+    typename ArrayT::Scalar Qxy;
 
-    particle_moments() : Qxx(0.0), Qxy(0.0), Qyy(0.0) {}
+    particle_moments() : Qxx(ArrayT::Zero()), Qxy(0.0) {}
 };
 
 /// 3D Quadrupole
-template<typename ScalarT>
-struct particle_moments<ScalarT,3,2> : public particle_moments<ScalarT,3,1>
+template<typename ArrayT>
+struct particle_moments<ArrayT,3,2> : public particle_moments<ArrayT,3,1>
 {
-    ScalarT Qxx, Qxy, Qxz;
-    ScalarT      Qyy, Qyz;
-    ScalarT           Qzz;
+    ArrayT Qxx, Qxy;
 
     particle_moments()
-        : Qxx(0.0), Qxy(0.0), Qxz(0.0), Qyy(0.0), Qyz(0.0), Qzz(0.0)
+        : Qxx(ArrayT::Zero()), Qxy(ArrayT::Zero())
     {}
 };
 
 /// 2D Octupole
-template<typename ScalarT>
-struct particle_moments<ScalarT,2,3> : public particle_moments<ScalarT,2,2>
+template<typename ArrayT>
+struct particle_moments<ArrayT,2,3> : public particle_moments<ArrayT,2,2>
 {
-    ScalarT Oxxx, Oyyy;
-    ScalarT Oxxy, Oxyy;
+    ArrayT Oxxx, Oxxy;
 
-    particle_moments() : Oxxx(0.0), Oyyy(0.0), Oxxy(0.0), Oxyy(0.0) {}
+    particle_moments() : Oxxx(ArrayT::Zero()), Oxxy(ArrayT::Zero()) {}
 };
 
 /// 3D Octupole
-template<typename ScalarT>
-struct particle_moments<ScalarT,3,3> : public particle_moments<ScalarT,3,2>
+template<typename ArrayT>
+struct particle_moments<ArrayT,3,3> : public particle_moments<ArrayT,3,2>
 {
-    ScalarT Oxxx, Oyyy, Ozzz;
-    ScalarT Oxyy, Oxzz, Oxyz;
-    ScalarT Oxxz, Oxxy;
-    ScalarT Oyyz, Oyzz;
+    ArrayT Oxxx, Oxxy, Oxzz;
+    typename ArrayT::Scalar Oxyz;
 
     particle_moments()
-        : Oxxx(0.0), Oyyy(0.0), Ozzz(0.0), Oxyy(0.0), Oxzz(0.0)
-        , Oxyz(0.0), Oxxz(0.0), Oxxy(0.0), Oyyz(0.0), Oyzz(0.0)
+        : Oxxx(ArrayT::Zero()), Oxxy(ArrayT::Zero())
+        , Oxzz(ArrayT::Zero()), Oxyz(0.0)
     {}
 };
 

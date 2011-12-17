@@ -58,11 +58,9 @@ struct efield_moments<PParticleT,1,2>
                      const vector_type& R, scalar_type invR2)
     {
         const scalar_type invR4 = invR2*invR2;
+        const array_type x(R), y(x.yx());
 
-        const array_type Dx(m.Dx,m.Dy) , Dy(Dx.yx());
-        const array_type x(R)          , y(x.yx());
-
-        return ((x*x-y*y)*Dx + 2*x*y*Dy)*invR4;
+        return ((x*x-y*y)*m.Dx + 2*x*y*m.Dx.yx())*invR4;
     }
 };
 
@@ -79,12 +77,10 @@ struct efield_moments<PParticleT,2,2>
                      const vector_type& R, scalar_type invR2)
     {
         const scalar_type invR6 = invR2*invR2*invR2;
+        const array_type x(R)   , y(x.yx());
+        const array_type x2(x*x), y2(x2.yx());
 
-        const array_type Qxx(m.Qxx,m.Qyy), Qyy(Qxx.yx()), Qxy(m.Qxy,m.Qxy);
-        const array_type x(R)            , y(x.yx());
-        const array_type x2(x*x)         , y2(x2.yx());
-
-        return (x*(x2-3*y2)*(Qxx-Qyy) + y*Qxy*(6*x2-2*y2))*invR6;
+        return (x*(x2-3*y2)*(m.Qxx-m.Qxx.yx()) + y*m.Qxy*(6*x2-2*y2))*invR6;
     }
 };
 
@@ -101,14 +97,11 @@ struct efield_moments<PParticleT,3,2>
                      const vector_type& R, scalar_type invR2)
     {
         const scalar_type invR8 = invR2*invR2*invR2*invR2;
+        const array_type x(R)   , y(x.yx());
+        const array_type x2(x*x), y2(x2.yx());
 
-        const array_type Oxxx(m.Oxxx,m.Oyyy), Oyyy(Oxxx.yx());
-        const array_type Oxxy(m.Oxxy,m.Oxyy), Oxyy(Oxxy.yx());
-        const array_type x(R)               , y(x.yx());
-        const array_type x2(x*x)            , y2(x2.yx());
-
-        return ((Oxxx-3*Oxyy)*(y2-2*x*y-x2)*(y2+2*x*y-x2)
-             + 4*x*y*(y2-x2)*(Oyyy-3*Oxxy))*invR8;
+        return ((m.Oxxx-3*m.Oxxy.yx())*(y2-2*x*y-x2)*(y2+2*x*y-x2)
+             + 4*x*y*(y2-x2)*(m.Oxxx.yx()-3*m.Oxxy))*invR8;
     }
 };
 

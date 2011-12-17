@@ -25,45 +25,36 @@
 namespace teatree
 {
 
-template<typename ScalarT, int Dim, int MultP> struct moments_shift;
+template<typename ArrayT, int Dim, int MultP> struct moments_shift;
 
 /**
  * Shifts the dipole moment in 3D.
  */
-template<typename ScalarT>
-struct moments_shift<ScalarT,3,1>
+template<typename ArrayT>
+struct moments_shift<ArrayT,3,1>
 {
-    typedef particle_moments<ScalarT,3,1> moments_type;
+    typedef particle_moments<ArrayT,3,1> moments_type;
 
-    template<typename ArrayT> TEATREE_FLATTEN
+    TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        const ArrayT pD = ArrayT(d.Dx,d.Dy,d.Dz) - r*d.M;
-        p.Dx += pD.x(); p.Dy += pD.y(); p.Dz += pD.z();
+        p.Dx += d.Dx - r*d.M;
     }
 };
 
 /**
  * Shifts the quadrupole moment in 3D.
  */
-template<typename ScalarT>
-struct moments_shift<ScalarT,3,2>
+template<typename ArrayT>
+struct moments_shift<ArrayT,3,2>
 {
-    typedef particle_moments<ScalarT,3,2> moments_type;
+    typedef particle_moments<ArrayT,3,2> moments_type;
 
-    template<typename ArrayT> TEATREE_FLATTEN
+    TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        const ArrayT D(d.Dx,d.Dy,d.Dz);
-
-        // Diagonal
-        const ArrayT pQd = ArrayT(d.Qxx,d.Qyy,d.Qzz) - 2*r*D + r*r*d.M;
-        p.Qxx += pQd.x(); p.Qyy += pQd.y(); p.Qzz += pQd.z();
-
-        // Off diagonal
-        const ArrayT pQod = ArrayT(d.Qxy,d.Qxz,d.Qyz) - r.xxy()*D.yzz()
-                          - r.yzz()*D.xxy() + r.xxy()*r.yzz()*d.M;
-        p.Qxy += pQod.x(); p.Qxz += pQod.y(); p.Qyz += pQod.z();
+        p.Qxx += d.Qxx - 2*r*d.Dx + r*r*d.M;
+        p.Qxy += d.Qxy - r.xxy()*d.Dx.yzz() - r.yzz()*d.Dx.xxy() + r.xxy()*r.yzz()*d.M;
     }
 };
 

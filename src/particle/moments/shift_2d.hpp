@@ -25,65 +25,53 @@
 namespace teatree
 {
 
-template<typename ScalarT, int Dim, int MultP> struct moments_shift;
+template<typename ArrayT, int Dim, int MultP> struct moments_shift;
 
 /**
  * Shifts the dipole moment in 2D.
  */
-template<typename ScalarT>
-struct moments_shift<ScalarT,2,1>
+template<typename ArrayT>
+struct moments_shift<ArrayT,2,1>
 {
-    typedef particle_moments<ScalarT,2,1> moments_type;
+    typedef particle_moments<ArrayT,2,1> moments_type;
 
-    template<typename ArrayT> TEATREE_FLATTEN
+    TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        const ArrayT pD = ArrayT(d.Dx,d.Dy) - r*d.M;
-        p.Dx += pD.x(); p.Dy += pD.y();
+        p.Dx += d.Dx - r*d.M;
     }
 };
 
 /**
  * Shifts the quadrupole moment in 2D.
  */
-template<typename ScalarT>
-struct moments_shift<ScalarT,2,2>
+template<typename ArrayT>
+struct moments_shift<ArrayT,2,2>
 {
-    typedef particle_moments<ScalarT,2,2> moments_type;
+    typedef particle_moments<ArrayT,2,2> moments_type;
 
-    template<typename ArrayT> TEATREE_FLATTEN
+    TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        // Diagonal; compute Qxx and Qyy together
-        const ArrayT pQ = ArrayT(d.Qxx,d.Qyy) - 2*r*ArrayT(d.Dx,d.Dy) + r*r*d.M;
-        p.Qxx += pQ.x(); p.Qyy += pQ.y();
-
-        // Off diagonal
-        p.Qxy += d.Qxy - r.x()*d.Dy - r.y()*d.Dx + r.x()*r.y()*d.M;
+        p.Qxx += d.Qxx + r*(-2*d.Dx + r*d.M);
+        p.Qxy += d.Qxy - r.x()*d.Dx.y() - r.y()*d.Dx.x() + r.x()*r.y()*d.M;
     }
 };
 
 /**
  * Shifts the octupole moment in 2D.
  */
-template<typename ScalarT>
-struct moments_shift<ScalarT,2,3>
+template<typename ArrayT>
+struct moments_shift<ArrayT,2,3>
 {
-    typedef particle_moments<ScalarT,2,3> moments_type;
+    typedef particle_moments<ArrayT,2,3> moments_type;
 
-    template<typename ArrayT> TEATREE_FLATTEN
+    TEATREE_FLATTEN
     static void exec(moments_type& p, const moments_type& d, const ArrayT& r)
     {
-        // Diagonal; compute Oxxx and Oyyy together
-        const ArrayT pO = ArrayT(d.Oxxx,d.Oyyy) - 3*r*ArrayT(d.Qxx,d.Qyy)
-                        + 3*r*r*ArrayT(d.Dx,d.Dy) - r*r*r*d.M;
-        p.Oxxx += pO.x(); p.Oyyy += pO.y();
-
-        // Off diagonal
-        const ArrayT pOd = ArrayT(d.Oxxy,d.Oxyy) - 2*r*d.Qxy
-                         - r.yx()*ArrayT(d.Qxx,d.Qyy) + r*r*ArrayT(d.Dy,d.Dx)
-                         + 2*r*r.yx()*ArrayT(d.Dx,d.Dy) - r*r*r.yx()*d.M;
-        p.Oxxy += pOd.x(); p.Oxyy += pOd.y();
+        p.Oxxx += d.Oxxx + r*(-3*d.Qxx + r*(3*d.Dx - r*d.M));
+        p.Oxxy += d.Oxxy - r.yx()*d.Qxx
+                + r*(-2*d.Qxy + 2*r.yx()*d.Dx + r*(d.Dx.yx()-r.yx()*d.M));
     }
 };
 

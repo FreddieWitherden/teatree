@@ -59,7 +59,7 @@ public: // Types & constants
                        , ParticleT::dimension
                        > base_type;
 
-    typedef particle_moments< scalar_type
+    typedef particle_moments< array_type
                             , dimension
                             , multipole_order
                             > particle_moments_type;

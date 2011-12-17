@@ -39,7 +39,7 @@ class moments_visitor
 private: // Types
     TEATREE_PSEUDO_PARTICLE_GENERATE_TYPEDEFS(PParticleT);
 
-    typedef moments_shift_recurse< scalar_type
+    typedef moments_shift_recurse< array_type
                                  , pseudo_particle_type::dimension
                                  , pseudo_particle_type::multipole_order
                                  > moments_shift_recuse_type;

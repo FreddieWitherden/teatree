@@ -160,19 +160,19 @@ BOOST_AUTO_TEST_CASE(construction2d)
     BOOST_CHECK_EQUAL(mv.leaves_visited(), N);
 
     // The dipole moment should be zero about the CoQ as Q is always +1
-    BOOST_CHECK_SMALL(pp.moments().Dx, TOL);
-    BOOST_CHECK_SMALL(pp.moments().Dy, TOL);
+    BOOST_CHECK_SMALL(pp.moments().Dx.x(), TOL);
+    BOOST_CHECK_SMALL(pp.moments().Dx.y(), TOL);
 
     // Quadrupole moments
-    BOOST_CHECK_CLOSE(pp.moments().Qxx, acc::sum(Qxx), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qyy, acc::sum(Qyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxx.x(), acc::sum(Qxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxx.y(), acc::sum(Qyy), TOL);
     BOOST_CHECK_CLOSE(pp.moments().Qxy, acc::sum(Qxy), TOL);
 
     // Octupole moments
-    BOOST_CHECK_CLOSE(pp.moments().Oxxx, acc::sum(Oxxx), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Oyyy, acc::sum(Oyyy), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Oxxy, acc::sum(Oxxy), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Oxyy, acc::sum(Oxyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxxx.x(), acc::sum(Oxxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxxx.y(), acc::sum(Oyyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxxy.x(), acc::sum(Oxxy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Oxxy.y(), acc::sum(Oxyy), TOL);
 }
 
 /**
@@ -243,15 +243,15 @@ BOOST_AUTO_TEST_CASE(construction3d)
     BOOST_CHECK_CLOSE(pp.moments().M, acc::sum(M), TOL);
 
     // Dipole moment
-    BOOST_CHECK_CLOSE(pp.moments().Dx, acc::sum(Dx), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Dy, acc::sum(Dy), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Dz, acc::sum(Dz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Dx.x(), acc::sum(Dx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Dx.y(), acc::sum(Dy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Dx.z(), acc::sum(Dz), TOL);
 
     // Quadrupole moment
-    BOOST_CHECK_CLOSE(pp.moments().Qxx, acc::sum(Qxx), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qyy, acc::sum(Qyy), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qzz, acc::sum(Qzz), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qxy, acc::sum(Qxy), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qxz, acc::sum(Qxz), TOL);
-    BOOST_CHECK_CLOSE(pp.moments().Qyz, acc::sum(Qyz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxx.x(), acc::sum(Qxx), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxx.y(), acc::sum(Qyy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxx.z(), acc::sum(Qzz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxy.x(), acc::sum(Qxy), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxy.y(), acc::sum(Qxz), TOL);
+    BOOST_CHECK_CLOSE(pp.moments().Qxy.z(), acc::sum(Qyz), TOL);
 }
