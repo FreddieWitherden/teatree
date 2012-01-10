@@ -90,7 +90,7 @@ struct efield_moments<PParticleT,2,3>
 
         return 0.5*x*((x2*inv15R7 - 3*inv3R5)*m.Qxx
                     + (y2*inv15R7 - inv3R5)*m.Qxx.yzx()
-                    + (z2*inv15R7 - inv3R5)*m.Qxx.zyx())
+                    + (z2*inv15R7 - inv3R5)*m.Qxx.zxy())
              + y*(x2*inv15R7 - inv3R5)*m.Qxy
              + z*(x2*inv15R7 - inv3R5)*m.Qxy.yzx()
              + (x*y*z*inv15R7)*m.Qxy.zxy();
