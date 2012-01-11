@@ -51,6 +51,7 @@ public: // Accessors
     double dt()          const { return dt_;    }
     double theta()       const { return theta_; }
     double nd()          const { return nd_; }
+    double qtomcutoff()     const { return qtomcutoff_; }
     bool output_header() const { return output_header_; }
 
     int    nsteps()  const
@@ -65,6 +66,7 @@ public: // Settors
     simulation_options& dt(double s);
     simulation_options& theta(double s);
     simulation_options& nd(double s);
+    simulation_options& qtomcutoff(double s);
     simulation_options& output_header(bool s);
     simulation_options& output_steps(const std::set<int>& s);
     simulation_options& output_basename(const std::string& s);
@@ -80,6 +82,7 @@ private: // Members
     double dt_;
     double theta_;
     double nd_;
+    double qtomcutoff_;
     bool   output_header_;
     std::string output_basename_;
     std::set<int> output_steps_;
@@ -107,6 +110,12 @@ simulation_options& simulation_options::nd(double s)
 {
     if (s <= 0.0) throw std::invalid_argument("bad nd");
     nd_ = s; return *this;
+}
+
+simulation_options& simulation_options::qtomcutoff(double s)
+{
+    if (s <= 0.0) throw std::invalid_argument("bad q-to-m cutoff");
+    qtomcutoff_ = s; return *this;
 }
 
 simulation_options& simulation_options::output_header(bool s)
@@ -139,6 +148,7 @@ void simulation_options::serialize(ArchiveT& ar, unsigned)
     ar & dt_;
     ar & theta_;
     ar & nd_;
+    ar & qtomcutoff_;
     ar & output_header_;
     ar & output_steps_;
     ar & output_basename_;

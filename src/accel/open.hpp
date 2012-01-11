@@ -118,10 +118,19 @@ void accel_open<EfieldT>::operator()(scalar_type t,
     for (int i = 0; i < N; ++i)
     {
         const particle_type& p = in[i];
-        const efield_type ef(p.r(), so_);
 
-        out[i] = inv_dimnd*p.qtom()*pp.visit_children(ef);
-        pvis += ef.leaves_visited(); ppvis += ef.branches_visited();
+        // Ignore particles with a charge-to-mass-ratio below the cutoff
+        if (std::fabs(in[i].qtom()) < so_.qtomcutoff())
+        {
+            out[i] = vector_type::Zero();
+        }
+        else
+        {
+            const efield_type ef(p.r(), so_);
+
+            out[i] = inv_dimnd*p.qtom()*pp.visit_children(ef);
+            pvis += ef.leaves_visited(); ppvis += ef.branches_visited();
+        }
     }
 
     // Compute times and fire off our signal

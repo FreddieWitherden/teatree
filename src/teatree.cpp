@@ -482,7 +482,13 @@ int main(int argc, char* argv[])
     ("theta",
      value<double>()->required()
                     ->notifier(bind(&simulation_options::theta, &so, arg1)),
-     "MAC parameter >= 0");
+     "MAC parameter >= 0")
+    ("qtom-cutoff",
+     value<double>()->default_value(0.0)
+                    ->notifier(bind(&simulation_options::qtomcutoff, &so, arg1)),
+     "Charge-to-mass cutoff ratio; particles with an absolute ratio less than "
+     "this are assumed to be immobile with a vanishing acceleration; this is "
+     "useful for simulating one component plasmas");
 
     // Hidden (positional) options
     options_description hidden_opt("Hidden options");
