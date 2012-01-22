@@ -114,7 +114,7 @@ simulation_options& simulation_options::nd(double s)
 
 simulation_options& simulation_options::qtomcutoff(double s)
 {
-    if (s <= 0.0) throw std::invalid_argument("bad q-to-m cutoff");
+    if (s < 0.0) throw std::invalid_argument("bad q-to-m cutoff");
     qtomcutoff_ = s; return *this;
 }
 
