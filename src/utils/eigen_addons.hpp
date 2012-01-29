@@ -1,6 +1,6 @@
 /*
     This file is part of teatree.
-    Copyright (C) 2011  Freddie Witherden <freddie@witherden.org>
+    Copyright (C) 2011–2012  Freddie Witherden <freddie@witherden.org>
 
     teatree is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as

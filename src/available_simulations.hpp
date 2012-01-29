@@ -1,6 +1,6 @@
 /*
     This file is part of teatree.
-    Copyright (C) 2011  Freddie Witherden <freddie@witherden.org>
+    Copyright (C) 2011–2012  Freddie Witherden <freddie@witherden.org>
 
     teatree is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as
@@ -44,6 +44,27 @@ typedef boost::mpl::vector
   simulation_open< double             // Double precision
                  , 2                  // 2D
                  , 2                  // Quadrupole moments
+                 , mac_opening_angle  // BH mac
+                 , efield_plummer     // Plummer potential
+                 , pusher_comp_21     // Verlet method
+                 >,
+  simulation_open< double             // Double precision
+                 , 3                  // 3D
+                 , 0                  // Quadrupole moments
+                 , mac_opening_angle  // BH mac
+                 , efield_plummer     // Plummer potential
+                 , pusher_comp_21     // Verlet method
+                 >,
+  simulation_open< double             // Double precision
+                 , 3                  // 3D
+                 , 1                  // Octupole moments
+                 , mac_opening_angle  // BH mac
+                 , efield_plummer     // Plummer potential
+                 , pusher_comp_21     // Verlet method
+                 >,
+  simulation_open< double             // Double precision
+                 , 3                  // 3D
+                 , 2                  // Octupole moments
                  , mac_opening_angle  // BH mac
                  , efield_plummer     // Plummer potential
                  , pusher_comp_21     // Verlet method
