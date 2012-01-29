@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(src)
 
 SET(TEATREE_BOOST_LIBS
     chrono
+    iostreams
     program_options
     serialization
     system)
@@ -131,6 +132,7 @@ SET(TEATREE_HEADERS
     src/pusher/base.hpp
     src/pusher/verlet.hpp
     src/simulation/options.hpp
+    src/simulation/particle_filter.hpp
     src/simulation/progress.hpp
     src/tree/branch.hpp
     src/tree/visitor.hpp

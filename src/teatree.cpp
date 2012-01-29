@@ -20,12 +20,14 @@
 #include "config.h"
 
 #include "available_simulations.hpp"
+#include "simulation/particle_filter.hpp"
 #include "simulation/progress.hpp"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/bind.hpp>
@@ -46,6 +48,7 @@
 
 using boost::archive::text_iarchive;
 using boost::archive::text_oarchive;
+using boost::iostreams::filtering_istream;
 using boost::phoenix::bind;
 using boost::phoenix::arg_names::arg1;
 using boost::phoenix::ref;
@@ -294,17 +297,27 @@ static void process_init(const std::string& input_file,
                          const std::string& sim_type,
                          const simulation_options& so)
 {
+    // Attempt to open the provided particle file
     std::ifstream ifs(input_file.c_str());
 
-    // TODO: Validate the input and error out if bad
+    // Error out if there was an issue opening the file
     if (!ifs.good())
         throw std::runtime_error("can't open " + input_file);
+
+    /*
+     * Attach a particle_filter to the stream.  This performs input validation,
+     * strips out comments ('#' lines) and handles headers at the start of a
+     * file.
+     */
+    filtering_istream filt_ifs;
+    filt_ifs.push(particle_filter(sim_type[1] - '0'));
+    filt_ifs.push(ifs);
 
     std::cout << "Creating simulation of type " << sim_type << "\n";
 
     // Create the simulation
     simulation_ptr sim;
-    for_sim_type(sim_type, simulation_type_constructor(sim, ifs, so));
+    for_sim_type(sim_type, simulation_type_constructor(sim, filt_ifs, so));
 
     // Output the final parameters being used by the simulation
     std::cout << "Parameters: " << sim->parameters() << "\n";
