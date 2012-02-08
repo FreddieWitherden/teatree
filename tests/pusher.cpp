@@ -24,7 +24,6 @@
 #include "config.h"
 
 #include "particle/particle.hpp"
-#include "pusher/verlet.hpp"
 #include "pusher/comp/21.hpp"
 #include "pusher/comp/43.hpp"
 #include "pusher/comp/67.hpp"

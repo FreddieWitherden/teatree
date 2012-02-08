@@ -130,7 +130,6 @@ SET(TEATREE_HEADERS
     src/pusher/comp/43.hpp
     src/pusher/comp/67.hpp
     src/pusher/base.hpp
-    src/pusher/verlet.hpp
     src/simulation/options.hpp
     src/simulation/particle_filter.hpp
     src/simulation/progress.hpp

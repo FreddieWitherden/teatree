@@ -28,7 +28,7 @@
 #include "mac/opening_angle.hpp"
 #include "particle/particle.hpp"
 #include "particle/pseudo_particle.hpp"
-#include "pusher/verlet.hpp"
+#include "pusher/comp/21.hpp"
 #include "simulation/options.hpp"
 
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(pusher_verlet_t)
     typedef pseudo_particle<particle_type,1> pseudo_particle_type;
     typedef efield_plummer<pseudo_particle_type,mac_opening_angle> ef_type;
     typedef accel_open<ef_type> accel_eval_type;
-    typedef pusher_verlet<accel_eval_type> pusher_type;
+    typedef pusher_comp_21<accel_eval_type> pusher_type;
 
     const int N = 320;
 
