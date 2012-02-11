@@ -1,6 +1,6 @@
 /*
     This file is part of teatree.
-    Copyright (C) 2011–2012  Freddie Witherden <freddie@witherden.org>
+    Copyright (C) 2012  Freddie Witherden <freddie@witherden.org>
 
     teatree is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as
@@ -17,39 +17,38 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_PUSHER_COMP_21_HPP
-#define TEATREE_PUSHER_COMP_21_HPP
+#ifndef TEATREE_CONSTRAINT_OPEN_HPP
+#define TEATREE_CONSTRAINT_OPEN_HPP
 
-#include "pusher/comp/base.hpp"
+#include "simulation/options.hpp"
 
-#include <string>
+#include <boost/serialization/access.hpp>
 
 namespace teatree
 {
 
-/**
- * Coefficients for the 21 composition method.
- */
-template<typename ScalarT>
-struct pusher_comp_21_coeffs
+template<typename ParticleT>
+class constraint_open
 {
-    enum { N = 1 };
-    static boost::array<ScalarT,N> coeffs()
+public: // Constructors
+    constraint_open() {}
+    constraint_open(const simulation_options&) {}
+
+public: // Functor
+    template<typename RandomRangeT>
+    void operator()(RandomRangeT&)
     {
-        boost::array<ScalarT,N> c = {{ 1.0 }}; return c;
+        // No op
     }
-};
 
-TEATREE_PUSHER_GENERATE_COMP(pusher_comp_21, pusher_comp_21_coeffs);
+private: // Serialization
+    friend class boost::serialization::access;
 
-// Traits
-template<typename A, typename C>
-struct name_traits<pusher_comp_21<A,C> >
-{
-    static std::string abbr() { return "C21"; }
-    static std::string name() { return "Störmer-Verlet (order = 2; evals = 1)"; }
+    template<typename ArchiveT>
+    void serialize(ArchiveT&, unsigned /*file version*/)
+    {}
 };
 
 }
 
-#endif // TEATREE_PUSHER_COMP_21_HPP
+#endif // TEATREE_CONSTRAINT_OPEN_HPP

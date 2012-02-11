@@ -42,7 +42,8 @@ template< typename ScalarT
         , template<typename, typename, typename> class MacT
         , template<typename, template<typename, typename, typename> class, int> class EfieldT
         , template<typename> class AccelEvalT
-        , template<typename> class PusherT
+        , template<typename> class ConstraintT
+        , template<typename, typename> class PusherT
         >
 class simulation_impl : public simulation
 {
@@ -50,15 +51,16 @@ public: // Types & constants
     typedef ScalarT scalar_type;
     typedef typename vector_traits<scalar_type,Dim>::type vector_type;
 
-    typedef particle<vector_type>                   particle_type;
-    typedef pseudo_particle<particle_type,MulP>     pseudo_particle_type;
+    typedef particle<vector_type>                    particle_type;
+    typedef pseudo_particle<particle_type,MulP>      pseudo_particle_type;
 
-    typedef EfieldT<pseudo_particle_type,MacT,MulP> efield_type;
+    typedef EfieldT<pseudo_particle_type,MacT,MulP>  efield_type;
 
-    typedef typename efield_type::mac_type          mac_type;
+    typedef typename efield_type::mac_type           mac_type;
 
-    typedef AccelEvalT<efield_type>                 accel_eval_type;
-    typedef PusherT<accel_eval_type>                pusher_type;
+    typedef AccelEvalT<efield_type>                  accel_eval_type;
+    typedef ConstraintT<particle_type>               constraint_type;
+    typedef PusherT<accel_eval_type,constraint_type> pusher_type;
 
     enum constants {
         dimension       = pseudo_particle_type::dimension,
@@ -80,7 +82,8 @@ public: // Constructors
                     const simulation_options& so)
         : simulation(so)
         , particle_pusher_(boost::istream_range<particle_type>(is),
-                           accel_eval_type(so), 0.0, so.dt())
+                           accel_eval_type(so), constraint_type(so),
+                           0.0, so.dt())
     { init(); }
 
 private: // Constructor helpers

@@ -501,7 +501,17 @@ int main(int argc, char* argv[])
                     ->notifier(bind(&simulation_options::qtomcutoff, &so, arg1)),
      "Charge-to-mass cutoff ratio; particles with an absolute ratio less than "
      "this are assumed to be immobile with a vanishing acceleration; this is "
-     "useful for simulating one component plasmas");
+     "useful for simulating one component plasmas")
+    ("min-bound",
+     value<double>()->default_value(0.0)
+                    ->notifier(bind(&simulation_options::min_bound, &so, arg1)),
+     "Minimum boundary coord for reflective boundaries; not relevant for open "
+     "boundary simulations")
+     ("max-bound",
+      value<double>()->default_value(32.0)
+                     ->notifier(bind(&simulation_options::max_bound, &so, arg1)),
+      "Maximum boundary coord for reflective boundaries; not relevant for open "
+      "boundary simulations");
 
     // Hidden (positional) options
     options_description hidden_opt("Hidden options");

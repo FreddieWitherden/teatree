@@ -39,12 +39,13 @@ namespace teatree
  *
  */
 template< typename AccelEvalT
+        , typename ConstraintT
         , template<typename> class CoeffsT
         >
-class pusher_comp_base : public pusher_base<AccelEvalT,1>
+class pusher_comp_base : public pusher_base<AccelEvalT,ConstraintT,1>
 {
 public: // Types & constants
-    typedef pusher_base<AccelEvalT,1> base_type;
+    typedef pusher_base<AccelEvalT,ConstraintT,1> base_type;
     TEATREE_PUSHER_GENERATE_TYPEDEFS(base_type);
 
 private:
@@ -63,8 +64,10 @@ public: // Constructors
 
     template<typename ForwardRangeT>
     pusher_comp_base(const ForwardRangeT& in,
-                     const AccelEvalT& acceleval, scalar_type t0, scalar_type dt)
-        : base_type(in, acceleval, t0, dt)
+                     const AccelEvalT& acceleval,
+                     const ConstraintT& constraint,
+                     scalar_type t0, scalar_type dt)
+        : base_type(in, acceleval, constraint, t0, dt)
     { init_coeffs(dt); }
 
 private: // Concrete implementations of pure virtuals from pusher_base
@@ -81,8 +84,8 @@ private: // Members
     boost::array<scalar_type,Ncoeff+1> hgp_;
 };
 
-template<typename AccelEvalT, template<typename> class CoeffsT>
-void pusher_comp_base<AccelEvalT,CoeffsT>::init_coeffs(scalar_type dt)
+template<typename AccelEvalT, typename ConstraintT, template<typename> class CoeffsT>
+void pusher_comp_base<AccelEvalT,ConstraintT,CoeffsT>::init_coeffs(scalar_type dt)
 {
     using boost::phoenix::arg_names::arg1;
     using boost::phoenix::arg_names::arg2;
@@ -102,9 +105,10 @@ void pusher_comp_base<AccelEvalT,CoeffsT>::init_coeffs(scalar_type dt)
     hgp_.back()  = 0.5*hg_.back();
 }
 
-template<typename AccelEvalT, template<typename> class CoeffsT>
-void pusher_comp_base<AccelEvalT,CoeffsT>::take_step(const particle_range& in,
-                                                     particle_range& out)
+template<typename AccelEvalT, typename ConstraintT, template<typename> class CoeffsT>
+void pusher_comp_base<AccelEvalT,ConstraintT,CoeffsT>::take_step(
+    const particle_range& in,
+    particle_range& out)
 {
     // Copy over in to out so we can work in-place
     boost::copy(in, out.begin());
@@ -136,9 +140,10 @@ void pusher_comp_base<AccelEvalT,CoeffsT>::take_step(const particle_range& in,
     }
 }
 
-template<typename AccelEvalT, template<typename> class CoeffsT>
+template<typename AccelEvalT, typename ConstraintT, template<typename> class CoeffsT>
 template<typename ArchiveT>
-void pusher_comp_base<AccelEvalT,CoeffsT>::serialize(ArchiveT& ar, unsigned)
+void pusher_comp_base<AccelEvalT,ConstraintT,CoeffsT>::serialize(ArchiveT& ar,
+                                                                 unsigned)
 {
     ar & boost::serialization::base_object<base_type>(*this);
 
@@ -152,21 +157,24 @@ void pusher_comp_base<AccelEvalT,CoeffsT>::serialize(ArchiveT& ar, unsigned)
  * Macro to generate a composition method with a class name of name
  *  using coefficients from the coeffs class/structure.
  */
-#define TEATREE_PUSHER_GENERATE_COMP(name,coeffs)                        \
-    template<typename AccelEvalT>                                        \
-    class name : public pusher_comp_base<AccelEvalT,coeffs>              \
-    {                                                                    \
-    public:                                                              \
-        typedef pusher_comp_base<AccelEvalT,coeffs> base_type;           \
-        TEATREE_PUSHER_GENERATE_TYPEDEFS(base_type);                     \
-                                                                         \
-        name() {}                                                        \
-                                                                         \
-        template<typename ForwardRangeT>                                 \
-        name(const ForwardRangeT& in, AccelEvalT acceleval,              \
-             scalar_type t0, scalar_type dt)                             \
-            : pusher_comp_base<AccelEvalT,coeffs>(in, acceleval, t0, dt) \
-        {}                                                               \
+#define TEATREE_PUSHER_GENERATE_COMP(name,coeffs)                          \
+    template<typename AccelEvalT, typename ConstraintT>                    \
+    class name : public pusher_comp_base<AccelEvalT,ConstraintT,coeffs>    \
+    {                                                                      \
+    public:                                                                \
+        typedef pusher_comp_base<AccelEvalT,ConstraintT,coeffs> base_type; \
+        TEATREE_PUSHER_GENERATE_TYPEDEFS(base_type);                       \
+                                                                           \
+        name() {}                                                          \
+                                                                           \
+        template<typename ForwardRangeT>                                   \
+        name(const ForwardRangeT& in, AccelEvalT acceleval,                \
+             ConstraintT constraint, scalar_type t0, scalar_type dt)       \
+            : pusher_comp_base<AccelEvalT,ConstraintT,coeffs>(in,          \
+                                                              acceleval,   \
+                                                              constraint,  \
+                                                              t0, dt)      \
+        {}                                                                 \
     }
 
 }

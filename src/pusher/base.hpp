@@ -49,7 +49,7 @@ namespace rng = boost::range;
 /**
  * Base particle pusher class.
  */
-template<typename AccelEvalT, int NAccel>
+template<typename AccelEvalT, typename ConstraintT, int NAccel>
 class pusher_base
 {
 public: // Types
@@ -59,7 +59,8 @@ protected:
     typedef std::vector<particle_type> particle_range;
     typedef std::vector<vector_type> accel_range;
 
-    typedef AccelEvalT accel_eval_type;
+    typedef AccelEvalT  accel_eval_type;
+    typedef ConstraintT constraint_type;
 
 public: // Constructors
     pusher_base() {}
@@ -67,12 +68,14 @@ public: // Constructors
     template<typename ForwardRangeT>
     pusher_base(const ForwardRangeT& in,
                 const accel_eval_type& acceleval,
+                const constraint_type& constraint,
                 scalar_type t0, scalar_type dt)
         : pcurr_(in.begin(), in.end())
         , ptemp_(pcurr_)
         , num_acceleval_(0), num_steps_(0)
         , t0_(t0), dt_(dt)
         , acceleval_(acceleval)
+        , constraint_(constraint)
     { BOOST_FOREACH(accel_range& a, atemp_) a.resize(this->num_particles()); }
 
     virtual ~pusher_base() {}
@@ -159,13 +162,19 @@ private: // Member variables
 
     // Acceleration evaluator
     accel_eval_type acceleval_;
+
+    // Constraint
+    constraint_type constraint_;
 };
 
-template<typename AccelEvalT, int NEval>
-void pusher_base<AccelEvalT,NEval>::advance()
+template<typename AccelEvalT, typename ConstraintT, int NEval>
+void pusher_base<AccelEvalT,ConstraintT,NEval>::advance()
 {
     // Take a step using the solver
     take_step(pcurr_, ptemp_);
+
+    // Enforce any user-provided constraints
+    constraint_(ptemp_);
 
     // Update the number of steps taken
     ++num_steps_;
@@ -174,11 +183,12 @@ void pusher_base<AccelEvalT,NEval>::advance()
     boost::swap(pcurr_, ptemp_);
 }
 
-template<typename AccelEvalT, int NEval>
+template<typename AccelEvalT, typename ConstraintT, int NEval>
 template<typename ArchiveT>
-void pusher_base<AccelEvalT,NEval>::serialize(ArchiveT& ar, unsigned)
+void pusher_base<AccelEvalT,ConstraintT,NEval>::serialize(ArchiveT& ar, unsigned)
 {
     ar & acceleval_;
+    ar & constraint_;
     ar & num_acceleval_;
     ar & num_steps_;
     ar & t0_;

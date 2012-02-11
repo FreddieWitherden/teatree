@@ -1,6 +1,6 @@
 /*
     This file is part of teatree.
-    Copyright (C) 2011–2012  Freddie Witherden <freddie@witherden.org>
+    Copyright (C) 2012  Freddie Witherden <freddie@witherden.org>
 
     teatree is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as
@@ -17,11 +17,11 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEATREE_SIMULATION_OPEN_HPP
-#define TEATREE_SIMULATION_OPEN_HPP
+#ifndef TEATREE_SIMULATION_REFLECTIVE_HPP
+#define TEATREE_SIMULATION_REFLECTIVE_HPP
 
 #include "accel/open.hpp"
-#include "constraint/open.hpp"
+#include "constraint/reflective.hpp"
 #include "simulation/impl.hpp"
 #include "simulation/traits.hpp"
 #include "utils/name_traits.hpp"
@@ -39,15 +39,15 @@ template< typename ScalarT
         , template<typename, template<typename, typename, typename> class, int> class EfieldT
         , template<typename, typename> class PusherT
         >
-class simulation_open : public simulation_impl< ScalarT
-                                              , Dim
-                                              , MulP
-                                              , MacT
-                                              , EfieldT
-                                              , accel_open
-                                              , constraint_open
-                                              , PusherT
-                                              >
+class simulation_reflective : public simulation_impl< ScalarT
+                                                    , Dim
+                                                    , MulP
+                                                    , MacT
+                                                    , EfieldT
+                                                    , accel_open
+                                                    , constraint_reflective
+                                                    , PusherT
+                                                    >
 {
 public: // Types
     typedef simulation_impl< ScalarT
@@ -56,19 +56,19 @@ public: // Types
                            , MacT
                            , EfieldT
                            , accel_open
-                           , constraint_open
+                           , constraint_reflective
                            , PusherT> base_type;
 
-public:
-    simulation_open() {}
+public: // Constructors
+    simulation_reflective() {}
 
-    simulation_open(std::istream& is, const simulation_options& so)
+    simulation_reflective(std::istream& is, const simulation_options& so)
         : base_type(is, so)
     {}
 
 private: // Virtual methods
     std::string do_type() const
-    { return simulation_traits<simulation_open>::type(); }
+    { return simulation_traits<simulation_reflective>::type(); }
 
 private: // Serialization
     friend class boost::serialization::access;
@@ -87,12 +87,12 @@ template< typename S
         , template<typename, template<typename, typename, typename> class, int> class E
         , template<typename, typename> class P
         >
-struct name_traits<simulation_open<S,D,Mu,M,E,P> >
+struct name_traits<simulation_reflective<S,D,Mu,M,E,P> >
 {
-    static std::string abbr() { return "O"; }
-    static std::string name() { return "Open"; }
+    static std::string abbr() { return "R"; }
+    static std::string name() { return "Reflective"; }
 };
 
 }
 
-#endif // TEATREE_SIMULATION_OPEN_HPP
+#endif // TEATREE_SIMULATION_REFLECTIVE_HPP

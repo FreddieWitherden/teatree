@@ -48,8 +48,8 @@ struct pusher_comp_67_coeffs
 TEATREE_PUSHER_GENERATE_COMP(pusher_comp_67, pusher_comp_67_coeffs);
 
 // Traits
-template<typename A>
-struct name_traits<pusher_comp_67<A> >
+template<typename A, typename C>
+struct name_traits<pusher_comp_67<A,C> >
 {
     static std::string abbr() { return "C67"; }
     static std::string name() { return "Composition (order = 6; evals = 7)"; }

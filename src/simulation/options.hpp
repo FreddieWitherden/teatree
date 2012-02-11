@@ -51,7 +51,9 @@ public: // Accessors
     double dt()          const { return dt_;    }
     double theta()       const { return theta_; }
     double nd()          const { return nd_; }
-    double qtomcutoff()     const { return qtomcutoff_; }
+    double qtomcutoff()  const { return qtomcutoff_; }
+    double min_bound()   const { return min_bound_; }
+    double max_bound()   const { return max_bound_; }
     bool output_header() const { return output_header_; }
 
     int    nsteps()  const
@@ -67,6 +69,8 @@ public: // Settors
     simulation_options& theta(double s);
     simulation_options& nd(double s);
     simulation_options& qtomcutoff(double s);
+    simulation_options& min_bound(double s);
+    simulation_options& max_bound(double s);
     simulation_options& output_header(bool s);
     simulation_options& output_steps(const std::set<int>& s);
     simulation_options& output_basename(const std::string& s);
@@ -83,6 +87,8 @@ private: // Members
     double theta_;
     double nd_;
     double qtomcutoff_;
+    double min_bound_;
+    double max_bound_;
     bool   output_header_;
     std::string output_basename_;
     std::set<int> output_steps_;
@@ -116,6 +122,16 @@ simulation_options& simulation_options::qtomcutoff(double s)
 {
     if (s < 0.0) throw std::invalid_argument("bad q-to-m cutoff");
     qtomcutoff_ = s; return *this;
+}
+
+simulation_options& simulation_options::min_bound(double s)
+{
+    min_bound_ = s; return *this;
+}
+
+simulation_options& simulation_options::max_bound(double s)
+{
+    max_bound_ = s; return *this;
 }
 
 simulation_options& simulation_options::output_header(bool s)
